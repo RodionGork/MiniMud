@@ -1,0 +1,88 @@
+{
+    "13-u": {
+        "rm": "park",
+        "o": [],
+        "vis": [
+            "park",
+            "start"
+        ],
+        "wiz": 1757997797
+    },
+    "start-r": {
+        "d": "School gates|You are standing before the high iron school gates, beyond them to W is a long yard along the pink school building; hole in the fence leads to N",
+        "w": [
+            "n park",
+            "e|pass yard|passkey helps to pass the gates...",
+            "e |You can't pass the great gates."
+        ],
+        "o": [],
+        "c": {
+            "look\\s+around": "https:\/\/i.imgur.com\/rtWo2N4.png You are in front of high metal gates with a school yard behind them and pink building on the right",
+            "use\\s+pass": "@haveObj pass teleport yard"
+        }
+    },
+    "cmds-x": {
+        "look": "@look",
+        "get\\s+(\\S+)": "@get $1",
+        "drop\\s+(\\S+)": "@drop $1",
+        "(?:go\\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out)": "@walk $1",
+        "say\\s+(\\S.*)": "@say $1",
+        "ready": "Banzai! :)",
+        "haha": "You laugh heartily: ha-ha-ha!"
+    },
+    "said-m": "You mumbled: $1",
+    "ball-o": {
+        "d": [
+            "heavy leather ball"
+        ],
+        "f": 0
+    },
+    "pass-o": {
+        "d": [
+            "white passcard",
+            "broken passkey"
+        ],
+        "f": 0
+    },
+    "import-x": [
+        "cmds-en.json",
+        "msgs-en.json"
+    ],
+    "asked-m": "You asked: $1",
+    "excld-m": "You exclaimed: $1",
+    "hereare-m": "Here are: $1",
+    "get-m": "$1 taken",
+    "drop-m": "$1 dropped",
+    "noobj-m": "Here is nothing like that!",
+    "haveno-m": "You have nothing like that!",
+    "noway-m": "You can't pass there|There is no way",
+    "newuser-m": "Enter 'ready' if you want to start the game!",
+    "nocmd-m": "Sorry, I don't understand that|Unknown command",
+    "park-r": {
+        "d": "In the park|You are wandering in a green park, with birds chirping above; hole in the fence is to SE",
+        "w": [
+            "se start"
+        ],
+        "o": [
+            [
+                "pass",
+                "1"
+            ],
+            [
+                "ball",
+                "0"
+            ]
+        ],
+        "c": {
+            "fart": "You've made a great sound!"
+        }
+    },
+    "yard-r": {
+        "d": "School yard|Path stretches along the pink building from E to W",
+        "w": [
+            "w|pass|0 start",
+            "ne|pass|1 park"
+        ],
+        "o": []
+    }
+}

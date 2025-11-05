@@ -1,0 +1,11 @@
+{
+    "cmds-x": {
+        "look": "@look",
+        "get\\s+(\\S+)": "@get $1",
+        "drop\\s+(\\S+)": "@drop $1",
+        "(?:go\\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out)": "@walk $1",
+        "say\\s+(\\S.*)": "@say $1",
+        "ready": "Banzai! :)",
+        "haha": "You laugh heartily: ha-ha-ha!"
+    }
+}

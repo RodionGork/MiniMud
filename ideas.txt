@@ -1,0 +1,21 @@
+- objects expiration
+- random object placement
+- object attributes (nogive, notake, nodrop...)
+- showing other users
+- object exchanging
+- wizard impersonation
+- synonyms for objects (and commands?)
+- user registering and banning
+- split storage into several files so they could be updated separately (at least users?)
+- command localization
+* commands at places (including view)
+* commands everywhere to be described in data file and added by wizard, rather than hardcoded
+* send images
+* way object flags (conditional walk)
+* message list and support for it (get, drop, go etc)
+* randomized messages
+* recognize direction commands for better error msg
+* importing sub-files in json
+* short place description
+* place memory to supplement short description
+* means to inspect and edit KV structure by wizard

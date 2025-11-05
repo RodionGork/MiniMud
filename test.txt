@@ -1,0 +1,35 @@
+!addroom start School gates|You are standing before the high iron school gates,\
+    beyond them to W is a long yard along the pink school building;\
+    hole in the fence leads to N
+!addcmd start look\s+around https://i.imgur.com/rtWo2N4.png\
+    You are in front of high metal gates with a school yard behind them\
+    and pink building on the right
+!addcmd * haha You laugh heartily: ha-ha-ha!
+!addmsg said You mumbled: $1
+!addobj ball heavy leather ball
+!putobj start ball
+!addobj pass white passcard | broken passkey
+!import cmds-en.json
+!import msgs-en.json
+look
+!addroom park In the park|You are wandering in a green park,\
+    with birds chirping above; hole in the fence is to SE
+!addcmd park fart You've made a great sound!
+!addway start n park
+!addway park se start
+!putobj park pass 1
+!addroom yard School yard|Path stretches along the pink building from E to W
+!addway start e|pass yard|passkey helps to pass the gates...
+!addway yard w|pass|0 start
+!addway yard ne|pass|1 park
+!addway start e |You can't pass the great gates.
+!addcmd start use\s+pass @haveObj pass teleport yard
+say Here is no hren!
+get hren
+get ball
+n
+say I have no baby!
+drop baby
+drop ball
+!save _test.json
+quit
