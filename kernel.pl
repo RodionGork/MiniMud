@@ -41,6 +41,16 @@ sub hasObj {
     return -1;
 }
 
+sub initObj {
+    my @descr = split /\|/, $_[0];
+    $_ = trim($_) for (@descr);
+    return {'d' => \@descr, 'f' => 0};
+}
+
+sub initRoom {
+    return {'d' => $_[0], 'w'=> [], 'o'=> []};
+}
+
 sub initUser {
     my $uid = shift @_;
     my $user = {'rm' => 'start', 'o' => [], 'seen' => []};
@@ -81,6 +91,22 @@ sub kvop {
     my $suffix = shift @_;
     my $key = (shift @_) . '-' . $suffix;
     return @_ ? kvset($key, $_[0]) : kvget($key);
+}
+
+sub markSeen {
+    my $rid = $_[0];
+    my $seen = $$cur{'user'}{'seen'};
+    my $pos = -1;
+    for (my $i = 0; $i < @$seen; $i++) {
+        if ($$seen[$i] eq $rid) {
+            $pos = $i;
+            last;
+        }
+    }
+    splice(@$seen, $pos, 1) if ($pos >= 0);
+    unshift @$seen, $rid;
+    pop @$seen while (@$seen > $pathMem);
+    user($$cur{'uid'}, $$cur{'user'});
 }
 
 sub meta { return kvop('x', @_); }
@@ -152,26 +178,101 @@ sub splitAndFill {
     return @res;
 }
 
+sub trim {
+    $_[0] =~ s/^\s+|\s$//g;
+    return $_[0];
+}
 
 sub user { return kvop('u', @_); }
 
 sub wizCmd {
     my ($cmd, $tail) = splitAndFill(' ', $_[0], 2);
-    if ($cmd eq 'addroom') {
-    } elsif ($cmd eq 'load') {
-        my $fname = $tail || 'gamedata.json';
-        kvload($fname);
-        my $imports = meta('import');
-        my $res = '';
-        if ($imports) {
-            for my $subfile (@$imports) {
-                kvload($subfile);
-                $res .= "subfile $subfile loaded\n";
-            }
-        }
-        return $res . "data file $fname loaded";
-    }
+    my $fn = eval('\&w_' . $cmd);
+    return &{$fn}($tail) if (defined &{$fn});
     return 'Unknown wiz command';
+}
+
+sub w_addcmd {
+    my ($rid, $pattern, $action) = splitAndFill(' ', $_[0], 3);
+    if ($rid eq '*') {
+        my $cmds = meta('cmds');
+        $$cmds{$pattern} = $action;
+        meta('cmds', $cmds);
+        return 'command added globally';
+    }
+    my $room = room($rid);
+    return 'No such room' unless ($room);
+    $$room{'c'}{$pattern} = $action;
+    room($rid, $room);
+    return "command added to room #$rid";
+}
+
+sub w_addobj {
+    my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
+    obj($oid, initObj $descr);
+    return "obj $oid added";
+}
+
+sub w_addmsg {
+    my ($key, $phrase) = splitAndFill(' ', $_[0], 2);
+    msgs($key, $phrase);
+    return "message added for #$key";
+}
+
+sub w_addroom {
+    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
+    room($rid, initRoom($descr));
+    return "room $rid added";
+}
+
+sub w_addway {
+    my ($rid1, $dir) = splitAndFill(' ', $_[0], 2);
+    my $room = room($rid1);
+    return 'No source room' if (!$room);
+    push @{$$room{'w'}}, $dir;
+    room($rid1, $room);
+    return "path from $rid1 added";
+}
+
+sub w_import {
+    my $fname = $_[0];
+    kvload($fname);
+    my $imports = meta('import');
+    push @$imports, $fname;
+    meta('import', $imports);
+    return "data file $fname loaded and added to imports";
+}
+
+sub w_load {
+    my $fname = $_[0] || 'gamedata.json';
+    kvload($fname);
+    my $imports = meta('import');
+    my $res = '';
+    if ($imports) {
+        for my $subfile (@$imports) {
+            kvload($subfile);
+            $res .= "subfile $subfile loaded\n";
+        }
+    }
+    return $res . "data file $fname loaded";
+}
+
+sub w_putobj {
+    my ($rid, $oid, $st) = splitAndFill(' ', $_[0], 3);
+    $st = $st ? int($st) : 0;
+    my $room = room($rid);
+    return 'No such room' unless ($room);
+    my $obj = obj($oid);
+    return 'No such object' unless ($obj);
+    push @{$$room{'o'}}, [$oid, $st];
+    room ($rid, $room);
+    return "obj #$oid added to room #$rid";
+}
+
+sub w_save {
+    my $fname = $_[0] || 'gamedata.json';
+    kvsave($fname);
+    return "data file $fname saved";
 }
 
 sub z_drop {
@@ -221,7 +322,16 @@ sub z_look {
         obj($$_[0])->{'d'}[$$_[1]]
     } @{$$room{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
+    markSeen($rid);
     return $res;
+}
+
+sub z_say {
+    my $phrase = $_[0];
+    $phrase = trim($phrase);
+    my $lastchr = substr $phrase, -1;
+    my $msg = $lastchr eq '?' ? 'asked' : ($lastchr eq '!' ? 'excld' : 'said');
+    return msg($msg, $phrase);
 }
 
 sub z_teleport {

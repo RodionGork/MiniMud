@@ -20,15 +20,14 @@ if (@ARGV > 1) {
     }
 } else {
     print "Auto executing 'look' command...\n";
-    runCmd($uid, 'look');
+    print runCmd($uid, 'look') . "\n";
 }
 
 while (1) {
     my $ur = '';
     while (1) {
         my $line = <STDIN>;
-        chomp $line;
-        $ur .= $line;
+        $ur .= trim($line);
         last if (substr($ur, -1) ne '\\');
         $ur = substr($ur, 0, -1) . ' ';
     }
@@ -36,8 +35,7 @@ while (1) {
         print "ok, bye!\n";
         last;
     }
-    chomp $ur;
-    my $resp = runCmd($uid, $ur);
+    my $resp = runCmd($uid, trim($ur));
     print "$resp\n";
 }
 
