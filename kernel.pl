@@ -174,6 +174,18 @@ sub wizCmd {
     return 'Unknown wiz command';
 }
 
+sub z_drop {
+    my $what = $_[0];
+    my $user = $$cur{'user'};
+    my $idx = hasObj($user, $what);
+    return msg('haveno') if ($idx < 0);
+    my $obj = splice @{$$user{'o'}}, $idx, 1;
+    user($$cur{'uid'}, $user);
+    push @{$$cur{'room'}{'o'}}, $obj;
+    room($$cur{'rid'}, $$cur{'room'});
+    return msg('drop', $what);
+}
+
 sub z_get {
     my $what = $_[0];
     my $room = $$cur{'room'};

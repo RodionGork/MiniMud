@@ -1,0 +1,13 @@
+{
+    "said-m": "You mumbled: $1",
+    "asked-m": "You asked: $1",
+    "excld-m": "You exclaimed: $1",
+    "hereare-m": "Here are: $1",
+    "get-m": "$1 taken",
+    "drop-m": "$1 dropped",
+    "noobj-m": "Here is nothing like that!",
+    "haveno-m": "You have nothing like that!",
+    "noway-m": "You can't pass there|There is no way",
+    "newuser-m": "Enter 'ready' if you want to start the game!",
+    "nocmd-m": "Sorry, I don't understand that|Unknown command"
+}

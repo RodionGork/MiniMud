@@ -2,14 +2,19 @@
 - random object placement
 - object attributes (nogive, notake, nodrop...)
 - showing other users
+- talking between users
+- talking in groups
 - object exchanging
 - wizard impersonation
-- synonyms for objects (and commands?)
+- synonyms for objects
 - user registering and banning
 - split storage into several files so they could be updated separately (at least users?)
-- command localization
+- mobiles wandering, attacking users, perhaps talking
+
 * commands at places (including view)
 * commands everywhere to be described in data file and added by wizard, rather than hardcoded
+* command localization (introduced with command customization)
+* command synonyms (the same)
 * send images
 * way object flags (conditional walk)
 * message list and support for it (get, drop, go etc)
