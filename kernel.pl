@@ -42,9 +42,15 @@ sub hasObj {
 }
 
 sub initObj {
-    my @descr = split /\|/, $_[0];
+    my @arg = split /\s+#/, $_[0];
+    my @descr = split /\|/, shift @arg;
     $_ = trim($_) for (@descr);
-    return {'d' => \@descr, 'f' => 0};
+    my $res = {'d' => \@descr, 'f' => {}};
+    for my $flag (@arg) {
+        my ($f, $v) = split /:/, $flag;
+        $$res{'f'}{$f} = numOrStr($v||1);
+    }
+    return $res;
 }
 
 sub initRoom {
@@ -132,6 +138,11 @@ sub newUserComes {
     print("Auto-creating user UID=$uid\n");
     initUser($uid);
     return runCmd($uid, $cmd);
+}
+
+sub numOrStr {
+    my $v = $_[0];
+    return ($v =~ /^\d.*/) ? ($v+0) : ($v."");
 }
 
 sub obj { return kvop('o', @_); }
@@ -294,6 +305,8 @@ sub z_get {
     my $room = $$cur{'room'};
     my $idx = hasObj($room, $what);
     return msg('noobj') if ($idx < 0);
+    my $proto = obj($what);
+    return msg('noget') if (exists $$proto{'f'}{'noget'});
     my $obj = splice @{$$room{'o'}}, $idx, 1;
     room($$cur{'rid'}, $room);
     push @{$$cur{'user'}{'o'}}, $obj;

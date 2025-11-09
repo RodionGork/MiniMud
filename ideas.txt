@@ -1,6 +1,5 @@
 - objects expiration
 - random object placement
-- object attributes (nogive, notake, nodrop...)
 - showing other users
 - talking between users
 - talking in groups
@@ -24,3 +23,4 @@
 * short place description
 * place memory to supplement short description
 * means to inspect and edit KV structure by wizard
+* object attributes (nogive, notake, nodrop...)

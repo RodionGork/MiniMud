@@ -9,6 +9,7 @@
 !addobj ball heavy leather ball
 !putobj start ball
 !addobj pass white passcard | broken passkey
+!addobj urn trash can #noget #weight:100 #s:park
 !import cmds-en.json
 !import msgs-en.json
 look
@@ -18,6 +19,7 @@ look
 !addway start n park
 !addway park se start
 !putobj park pass 1
+!putobj park urn
 !addroom yard School yard|Path stretches along the pink building from E to W
 !addway start e|pass yard|passkey helps to pass the gates...
 !addway yard w|pass|0 start

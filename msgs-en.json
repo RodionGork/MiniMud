@@ -6,6 +6,7 @@
     "get-m": "$1 taken",
     "drop-m": "$1 dropped",
     "noobj-m": "Here is nothing like that!",
+    "noget-m": "You can't take this!",
     "haveno-m": "You have nothing like that!",
     "noway-m": "You can't pass there|There is no way",
     "newuser-m": "Enter 'ready' if you want to start the game!",
