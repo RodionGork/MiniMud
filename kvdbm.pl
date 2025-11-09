@@ -19,9 +19,11 @@ sub kvget {
 }
 
 sub kvsave {
-    my $j = JSON::PP->new->pretty;
+    my %res;
+    $res{$_} = kvget($_) for (keys %kv);
+    my $j = JSON::PP->new->allow_nonref->pretty;
     open(my $f, '>', shift @_);
-    print $f $j->encode(\%kv);
+    print $f $j->encode(\%res);
     close($f);
 }
 
@@ -29,12 +31,7 @@ sub kvload {
     open(my $f, '<', shift @_);
     local $/;
     my $res = $json->decode(<$f>);
-    $kv{$_} = $json->encode($$res{$_}) for (keys %$res);
-    #for my $k (keys %$res) {
-    #    print "$k...\n";
-    #    my $v = $$res{$k};
-    #    $kv{$k} = $json->encode($v);
-    #}
+    kvset($_, $$res{$_}) for (keys %$res);
 }
 
 1;

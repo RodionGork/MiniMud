@@ -3,7 +3,7 @@ use warnings;
 use File::Basename;
 use lib dirname(__FILE__);
 use JSON::PP;
-require 'kvmem.pl';
+require ($ENV{'MUD_KV'} || 'kvdbm.pl');
 
 our $autoCreateUser = 0;
 our $wizPwd = 'Pl0ugh!';
@@ -238,8 +238,10 @@ sub w_import {
     my $fname = $_[0];
     kvload($fname);
     my $imports = meta('import');
-    push @$imports, $fname;
-    meta('import', $imports);
+    unless (grep($_ eq $fname, @$imports)) {
+        push @$imports, $fname;
+        meta('import', $imports);
+    }
     return "data file $fname loaded and added to imports";
 }
 
