@@ -3,10 +3,10 @@ use warnings;
 use File::Basename;
 use lib dirname(__FILE__);
 use JSON::PP;
-require ($ENV{'MUD_KV'} || 'kvdbm.pl');
+require ($ENV{'MUD_KV'} // 'kvdbm.pl');
 
 our $autoCreateUser = 0;
-our $wizPwd = 'Pl0ugh!';
+our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
 our $pathMem = 20;
 
 my $cur;
@@ -25,9 +25,19 @@ sub cmdMatchAndAct {
     my ($pat, $cmd, $act) = @_;
     my @m = ($cmd =~ /^$pat$/i);
     return '' unless (@m);
+    if (substr($act, 0, 1) eq '[') {
+        my ($predicate, $tail) = splitAndFill(' ', substr($act, 1), 2);
+        ($tail, $act) = split /\]\s+/, $tail, 2;
+        my $pfn = eval('\&z_' . $predicate);
+        return '' unless (&$pfn($tail));
+    }
     $$cur{'matches'} = \@m;
-    return action(split(/ /, substr($act, 1))) if (substr($act, 0, 1) eq '@');
-    return $act;
+    my @res = ();
+    my @acts = split /\s*;\s*/, $act;
+    for my $a (@acts) {
+        push @res, ((substr($a, 0, 1) ne '@') ? $a : action(split(/ /, substr($a, 1))));
+    }
+    return join "\n", @res;
 }
 
 sub hasObj {
@@ -93,6 +103,21 @@ sub inspect {
     return "saved '$key':\n" . $j->new->encode($obj);
 }
 
+sub instObj {
+    my ($oid, $proto) = @_;
+    my $start = $$proto{'f'}{'s'} // '';
+    return '' if (!$start);
+    my $state = $$proto{'f'}{'init'} // 0;
+    my @places = split ',', $start;
+    my $room = $places[int(rand(@places))];
+    my $err = putObjInt($room, $oid, $state);
+    if ($err) {
+        print "$err\n";
+        return '';
+    }
+    return $room;
+}
+
 sub kvop {
     my $suffix = shift @_;
     my $key = (shift @_) . '-' . $suffix;
@@ -146,6 +171,17 @@ sub numOrStr {
 }
 
 sub obj { return kvop('o', @_); }
+
+sub putObjInt {
+    my ($rid, $oid, $st) = @_;
+    my $room = room($rid);
+    return 'No such room' unless ($room);
+    my $obj = obj($oid);
+    return 'No such object' unless ($obj);
+    push @{$$room{'o'}}, [$oid, $st];
+    room ($rid, $room);
+    return '';
+}
 
 sub room { return kvop('r', @_); }
 
@@ -220,8 +256,13 @@ sub w_addcmd {
 
 sub w_addobj {
     my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
-    obj($oid, initObj $descr);
-    return "obj $oid added";
+    my $proto = initObj $descr;
+    obj($oid, $proto);
+    my $where = instObj($oid, $proto);
+    if ($where) {
+        $where = " and put to room #$where";
+    }
+    return "obj #$oid added$where";
 }
 
 sub w_addmsg {
@@ -273,13 +314,8 @@ sub w_load {
 sub w_putobj {
     my ($rid, $oid, $st) = splitAndFill(' ', $_[0], 3);
     $st = $st ? int($st) : 0;
-    my $room = room($rid);
-    return 'No such room' unless ($room);
-    my $obj = obj($oid);
-    return 'No such object' unless ($obj);
-    push @{$$room{'o'}}, [$oid, $st];
-    room ($rid, $room);
-    return "obj #$oid added to room #$rid";
+    my $err = putObjInt($rid, $oid, $st);
+    return $err ? $err : "obj #$oid added to room #$rid";
 }
 
 sub w_save {
@@ -294,10 +330,16 @@ sub z_drop {
     my $idx = hasObj($user, $what);
     return msg('haveno') if ($idx < 0);
     my $obj = splice @{$$user{'o'}}, $idx, 1;
+    my $proto = obj($$obj[0]);
     user($$cur{'uid'}, $user);
-    push @{$$cur{'room'}{'o'}}, $obj;
-    room($$cur{'rid'}, $$cur{'room'});
-    return msg('drop', $what);
+    if (exists $$proto{'f'}{'nodrop'}) {
+        my $room = instObj($what, $proto);
+        return msg($room ? 'disapp' : 'disint', $what);
+    } else {
+        push @{$$cur{'room'}{'o'}}, $obj;
+        room($$cur{'rid'}, $$cur{'room'});
+        return msg('drop', $what);
+    }
 }
 
 sub z_get {
@@ -314,10 +356,18 @@ sub z_get {
     return msg('get', $what);
 }
 
+sub z_grant {
+    my $oid = $_[0];
+    my $obj = obj($oid);
+    return 'No such object' unless ($obj);
+    push @{$$cur{'user'}{'o'}}, [$oid, 0];
+    user ($$cur{'uid'}, $$cur{'user'});
+    return 'You got #' . $oid;
+}
+
 sub z_haveObj {
-    my ($obj, $state) = split /=/, shift @_, 2;
-    return msg('haveno') if (hasObj($$cur{'user'}, $obj, $state) < 0);
-    return action(@_);
+    my ($obj, $state) = split /=/, $_[0], 2;
+    return hasObj($$cur{'user'}, $obj, $state) >= 0;
 }
 
 sub z_look {

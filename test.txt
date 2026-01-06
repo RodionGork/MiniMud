@@ -8,24 +8,30 @@
 !addmsg said You mumbled: $1
 !addobj ball heavy leather ball
 !putobj start ball
-!addobj pass white passcard | broken passkey
-!addobj urn trash can #noget #weight:100 #s:park
 !import cmds-en.json
 !import msgs-en.json
 look
 !addroom park In the park|You are wandering in a green park,\
-    with birds chirping above; hole in the fence is to SE
+    with birds chirping above; hole in the fence is to SE and\
+    low croacks are sometimes heard from the opposite direction.
+!addobj urn trash can #noget #weight:100 #s:park
 !addcmd park fart You've made a great sound!
 !addway start n park
 !addway park se start
-!putobj park pass 1
-!putobj park urn
 !addroom yard School yard|Path stretches along the pink building from E to W
 !addway start e|pass yard|passkey helps to pass the gates...
 !addway yard w|pass|0 start
 !addway yard ne|pass|1 park
 !addway start e |You can't pass the great gates.
-!addcmd start use\s+pass @haveObj pass teleport yard
+!addcmd start use\s+pass [haveObj pass] You applied the passkey and went through the gates; @teleport yard
+!addroom pond Here is a small pond in the park. Small path winds south.
+!addobj frog Cute Frog sits here with a small crown on her head #noget #s:pond
+!addway park nw pond
+!addway pond s park
+!addobj arrow feathered arrow with thin steel point #nodrop
+!addcmd pond kiss\s+frog [haveObj arrow] Frog smiled and flushed
+!addcmd pond kiss\s+frog Frog exclaimed "bloody zoophile", flushed and gave you a small arrow; @grant arrow
+!addobj pass white passcard | broken passkey #nodrop #s:park,pond #init:1
 say Here is no hren!
 get hren
 get ball

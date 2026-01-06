@@ -1,5 +1,5 @@
+- conditional command fallbacks
 - objects expiration
-- random object placement
 - showing other users
 - talking between users
 - talking in groups
@@ -24,3 +24,7 @@
 * place memory to supplement short description
 * means to inspect and edit KV structure by wizard
 * object attributes (nogive, notake, nodrop...)
+* nodrop flag
+* receiving objects on actions
+* multi-actions for command
+* random object placement
