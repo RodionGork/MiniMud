@@ -75,7 +75,6 @@ sub initUser {
 }
 
 sub inspect {
-    my $get = sub { my ($elem, $subkey) = @_; ($subkey =~ m/\d+/) ? $$elem[$subkey] : $$elem{$subkey}; };
     my $cmd = $_[0];
     my $j = JSON::PP->new->allow_nonref;
     if (substr($cmd, 0, 2) eq '//') {
@@ -83,24 +82,43 @@ sub inspect {
         $cmd = substr $cmd, 1;
     }
     my @cmd = split '=', substr $cmd, 1;
+    my $replace;
+    if (@cmd > 1) {
+        $replace = $cmd[1];
+        $replace = [] if ($replace eq '[]');
+        $replace = {} if ($replace eq '{}');
+    }
     my @path = split '/', $cmd[0];
     my $key = shift @path;
+    my $par;
     my $obj = kvget($key);
-    return "No such record in storage: $key" unless ($obj);
+    return "No such record in storage: $key" unless ($obj || @path == 0 && defined($replace));
     my $elem = $obj;
-    while (@path > 1) {
-        my $subkey = shift @path;
-        $elem = &$get($elem, $subkey);
-        return "No subkey: $subkey" unless (defined($elem));
+    my $subkey = $key;
+    my $parIsHash = 1;
+    while (@path) {
+        $subkey = shift @path;
+        $par = $elem;
+        $parIsHash = ref($elem) eq 'HASH';
+        $elem = $parIsHash ? $$elem{$subkey} : $$elem[$subkey];
+        return "No subkey: $subkey" unless (defined($elem) || @path == 0 && defined($replace));
     }
-    return $j->encode(@path ? &$get($elem, $path[0])||"no leaf for {$path[0]}": $elem) if (@cmd == 1);
-    if ($cmd[1] ne '') {
-        $$elem{$path[0]} = $cmd[1];
+    return $j->encode($elem//"No leaf for key $subkey") unless (defined $replace);
+    if ($replace ne '-') {
+        if ($parIsHash) {
+            $$par{$subkey} = $replace;
+        } else {
+            $$par[$subkey] = $replace;
+        }
     } else {
-        delete $$elem{$path[0]};
+        if ($parIsHash) {
+            delete $$par{$subkey};
+        } else {
+            splice @$par, $subkey, 1;
+        }
     }
     kvset($key, $obj);
-    return "saved '$key':\n" . $j->new->encode($obj);
+    return "saved '$key': $replace";
 }
 
 sub instObj {
@@ -191,16 +209,16 @@ sub runCmd {
     my $us = user($uid);
     return newUserComes($uid, $cmd) unless ($us);
     my $rid = $$us{'rm'};
-    my $room = room($rid) || {};
+    my $room = room($rid) // {};
     $cur = {'uid'=>$uid, 'user'=>$us, 'rid'=>$rid, 'room'=>$room};
-    my %cmds = %{$$room{'c'} || {}};
-    for my $pat (keys %cmds) {
-        my $res = cmdMatchAndAct($pat, $cmd, $cmds{$pat});
+    my @cmds = @{$$room{'c'} // []};
+    for my $c (@cmds) {
+        my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
         return $res if ($res); 
     }
-    %cmds = %{meta('cmds') || {}};
-    for my $pat (keys %cmds) {
-        my $res = cmdMatchAndAct($pat, $cmd, $cmds{$pat});
+    @cmds = @{meta('cmds') // []};
+    for my $c (@cmds) {
+        my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
         return $res if ($res); 
     }
     if ($verb eq 'wizpwd' && $tail eq $wizPwd) {
@@ -243,13 +261,13 @@ sub w_addcmd {
     my ($rid, $pattern, $action) = splitAndFill(' ', $_[0], 3);
     if ($rid eq '*') {
         my $cmds = meta('cmds');
-        $$cmds{$pattern} = $action;
+        push @$cmds, [$pattern, $action];
         meta('cmds', $cmds);
         return 'command added globally';
     }
     my $room = room($rid);
     return 'No such room' unless ($room);
-    $$room{'c'}{$pattern} = $action;
+    push @{$$room{'c'}}, [$pattern, $action];
     room($rid, $room);
     return "command added to room #$rid";
 }

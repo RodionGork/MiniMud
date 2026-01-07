@@ -1,4 +1,3 @@
-- conditional command fallbacks
 - objects expiration
 - showing other users
 - talking between users
@@ -28,3 +27,4 @@
 * receiving objects on actions
 * multi-actions for command
 * random object placement
+* conditional command fallbacks
