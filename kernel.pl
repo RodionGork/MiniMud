@@ -64,13 +64,19 @@ sub initObj {
 }
 
 sub initRoom {
-    return {'d' => $_[0], 'w'=> [], 'o'=> []};
+    return {'d' => $_[0], 'w'=> []};
 }
 
 sub initUser {
     my $uid = shift @_;
     my $user = {'rm' => 'start', 'o' => [], 'seen' => []};
     user($uid, $user);
+    my $handle = 'user-' . $uid;
+    my $userd = {'h' => $handle, 'n' => 'Unknown'};
+    userdata($uid, $userd);
+    my $roomst = roomstate('start') // {};
+    $$roomst{'u'}{$uid} = [$handle, time()];
+    roomstate('start', $roomst);
     return $user;
 }
 
@@ -192,25 +198,28 @@ sub obj { return kvop('o', @_); }
 
 sub putObjInt {
     my ($rid, $oid, $st) = @_;
-    my $room = room($rid);
-    return 'No such room' unless ($room);
+    my $roomst = roomstate($rid);
+    return 'No such room' unless ($roomst);
     my $obj = obj($oid);
     return 'No such object' unless ($obj);
-    push @{$$room{'o'}}, [$oid, $st];
-    room ($rid, $room);
+    push @{$$roomst{'o'}}, [$oid, $st];
+    roomstate($rid, $roomst);
     return '';
 }
 
 sub room { return kvop('r', @_); }
+sub roomstate { return kvop('rs', @_); }
 
 sub runCmd {
     my ($uid, $cmd) = @_;
     my ($verb, $tail) = splitAndFill(' ', $cmd, 2);
     my $us = user($uid);
+    my $ud = userdata($uid);
     return newUserComes($uid, $cmd) unless ($us);
     my $rid = $$us{'rm'};
     my $room = room($rid) // {};
-    $cur = {'uid'=>$uid, 'user'=>$us, 'rid'=>$rid, 'room'=>$room};
+    my $roomst = roomstate($rid) // {};
+    $cur = {'uid'=>$uid, 'user'=>$us, 'userd'=>$ud, 'rid'=>$rid, 'room'=>$room, 'roomst'=>$roomst};
     my @cmds = @{$$room{'c'} // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
@@ -249,6 +258,7 @@ sub trim {
 }
 
 sub user { return kvop('u', @_); }
+sub userdata { return kvop('ud', @_); }
 
 sub wizCmd {
     my ($cmd, $tail) = splitAndFill(' ', $_[0], 2);
@@ -292,6 +302,8 @@ sub w_addmsg {
 sub w_addroom {
     my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
     room($rid, initRoom($descr));
+    my $roomst = roomstate($rid);
+    roomstate($rid, {}) if (!$roomst);
     return "room $rid added";
 }
 
@@ -354,21 +366,21 @@ sub z_drop {
         my $room = instObj($what, $proto);
         return msg($room ? 'disapp' : 'disint', $what);
     } else {
-        push @{$$cur{'room'}{'o'}}, $obj;
-        room($$cur{'rid'}, $$cur{'room'});
+        push @{$$cur{'roomst'}{'o'}}, $obj;
+        roomstate($$cur{'rid'}, $$cur{'roomst'});
         return msg('drop', $what);
     }
 }
 
 sub z_get {
     my $what = $_[0];
-    my $room = $$cur{'room'};
-    my $idx = hasObj($room, $what);
+    my $roomst = $$cur{'roomst'};
+    my $idx = hasObj($roomst, $what);
     return msg('noobj') if ($idx < 0);
     my $proto = obj($what);
     return msg('noget') if (exists $$proto{'f'}{'noget'});
-    my $obj = splice @{$$room{'o'}}, $idx, 1;
-    room($$cur{'rid'}, $room);
+    my $obj = splice @{$$roomst{'o'}}, $idx, 1;
+    roomstate($$cur{'rid'}, $roomst);
     push @{$$cur{'user'}{'o'}}, $obj;
     user($$cur{'uid'}, $$cur{'user'});
     return msg('get', $what);
@@ -380,7 +392,7 @@ sub z_grant {
     return 'No such object' unless ($obj);
     push @{$$cur{'user'}{'o'}}, [$oid, 0];
     user ($$cur{'uid'}, $$cur{'user'});
-    return 'You got #' . $oid;
+    return 'You got ' . $oid;
 }
 
 sub z_haveObj {
@@ -391,19 +403,22 @@ sub z_haveObj {
 sub z_look {
     my $rid = shift @_;
     my $short = @_ ? $_[0] : 0;
-    my $room;
+    my ($room, $roomst);
     if (!defined($rid)) {
         $rid = $$cur{'rid'};
         $room = $$cur{'room'};
+        $roomst = $$cur{'roomst'};
+
     } else {
         $room = room($rid);
+        $roomst = roomstate($rid);
     }
     my $descr = $$room{'d'} || "no room #$rid";
     my ($res, $long) = splitAndFill(qr/\|/, $descr, 2);
     $res .= "\n$long" if ($long && !($short && grep($_ eq $rid, @{$$cur{'user'}{'seen'}})));
     my @objdescr = map {
         obj($$_[0])->{'d'}[$$_[1]]
-    } @{$$room{'o'} || []};
+    } @{$$roomst{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
     markSeen($rid);
     return $res;
@@ -421,8 +436,14 @@ sub z_teleport {
     my $where = $_[0];
     my $newLook = z_look($where, 1);
     my $us = $$cur{'user'};
+    my $uid = $$cur{'uid'};
     $$us{'rm'} = $where;
-    user($$cur{'uid'}, $us);
+    user($uid, $us);
+    delete($$cur{'roomst'}{'u'}{$uid});
+    roomstate($$cur{'rid'}, $$cur{'roomst'});
+    my $rsnew = roomstate($where);
+    $$rsnew{'u'}{$uid} = [$$cur{'userd'}{'h'}, time()];
+    roomstate($where, $rsnew);
     return $newLook;
 }
 
