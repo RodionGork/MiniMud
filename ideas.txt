@@ -1,5 +1,4 @@
 - objects expiration
-- showing other users
 - talking between users
 - talking in groups
 - object exchanging
@@ -28,3 +27,4 @@
 * multi-actions for command
 * random object placement
 * conditional command fallbacks
+* showing other users

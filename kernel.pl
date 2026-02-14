@@ -75,7 +75,7 @@ sub initUser {
     my $userd = {'h' => $handle, 'n' => 'Unknown'};
     userdata($uid, $userd);
     my $roomst = roomstate('start') // {};
-    $$roomst{'u'}{$uid} = [$handle, time()];
+    $$roomst{'u'}{$uid} = [$handle, $$cur{'ts'}];
     roomstate('start', $roomst);
     return $user;
 }
@@ -202,7 +202,7 @@ sub putObjInt {
     return 'No such room' unless ($roomst);
     my $obj = obj($oid);
     return 'No such object' unless ($obj);
-    push @{$$roomst{'o'}}, [$oid, $st];
+    push @{$$roomst{'o'}}, [$oid, $st, $$obj{'d'}[$st]];
     roomstate($rid, $roomst);
     return '';
 }
@@ -219,7 +219,7 @@ sub runCmd {
     my $rid = $$us{'rm'};
     my $room = room($rid) // {};
     my $roomst = roomstate($rid) // {};
-    $cur = {'uid'=>$uid, 'user'=>$us, 'userd'=>$ud, 'rid'=>$rid, 'room'=>$room, 'roomst'=>$roomst};
+    $cur = {'uid'=>$uid, 'user'=>$us, 'userd'=>$ud, 'rid'=>$rid, 'room'=>$room, 'roomst'=>$roomst, 'ts'=>time()};
     my @cmds = @{$$room{'c'} // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
@@ -231,11 +231,11 @@ sub runCmd {
         return $res if ($res); 
     }
     if ($verb eq 'wizpwd' && $tail eq $wizPwd) {
-        $$us{'wiz'} = time() + 600;
+        $$us{'wiz'} = $$cur{'ts'} + 600;
         user($uid, $us);
         return '10 min';
     }
-    if (time() < ($$us{'wiz'}||0)) {
+    if ($$cur{'ts'} < ($$us{'wiz'}||0)) {
         my $firstLtr = substr $cmd, 0, 1;
         return wizCmd(substr $cmd, 1) if ($firstLtr eq '!');
         return inspect($cmd) if ($firstLtr eq '/');
@@ -416,10 +416,13 @@ sub z_look {
     my $descr = $$room{'d'} || "no room #$rid";
     my ($res, $long) = splitAndFill(qr/\|/, $descr, 2);
     $res .= "\n$long" if ($long && !($short && grep($_ eq $rid, @{$$cur{'user'}{'seen'}})));
-    my @objdescr = map {
-        obj($$_[0])->{'d'}[$$_[1]]
-    } @{$$roomst{'o'} || []};
+    my @objdescr = map $$_[2], @{$$roomst{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
+    for my $u (keys %{$$roomst{'u'}}) {
+        next if ($u == $$cur{'uid'});
+        my @urec = @{$$roomst{'u'}{$u}};
+        $res .= "\n" .msg($$cur{'ts'} - $urec[1] < 60 ? 'hereuser' : 'heresleep', $urec[0]);
+    }
     markSeen($rid);
     return $res;
 }
@@ -442,7 +445,7 @@ sub z_teleport {
     delete($$cur{'roomst'}{'u'}{$uid});
     roomstate($$cur{'rid'}, $$cur{'roomst'});
     my $rsnew = roomstate($where);
-    $$rsnew{'u'}{$uid} = [$$cur{'userd'}{'h'}, time()];
+    $$rsnew{'u'}{$uid} = [$$cur{'userd'}{'h'}, $$cur{'ts'}];
     roomstate($where, $rsnew);
     return $newLook;
 }

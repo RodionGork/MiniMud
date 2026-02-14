@@ -3,6 +3,8 @@
     "asked-m": "You asked: $1",
     "excld-m": "You exclaimed: $1",
     "hereare-m": "Here are: $1",
+    "hereuser-m": "$1 stands here",
+    "heresleep-m": "$1 sleeps here|$1 is resting here",
     "get-m": "$1 taken",
     "drop-m": "$1 dropped",
     "disint-m": "$1 have fallen to pieces just as it touched the ground",
