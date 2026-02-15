@@ -7,6 +7,8 @@
         ["(?:go\\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out)", "@walk $1"],
         ["say\\s+(\\S.*)", "@say $1"],
         ["ready", "Banzai! :)"],
+        ["pinch\\s+(\\S+)", "@social $1 pinched"],
+        ["kiss\\s+(\\S+)", "@social $1 kissed"],
         ["haha", "You laugh heartily: ha-ha-ha!"]
     ]
 }

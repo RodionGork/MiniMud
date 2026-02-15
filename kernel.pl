@@ -56,9 +56,7 @@ sub hasObj {
 sub hereUser {
     my ($handle) = @_;
     my $users = $$cur{'roomst'}{'u'};
-    print "looking for $handle in $$cur{'rid'}\n";
     while (my ($uid, $val) = each %$users) {
-        print "$uid : $$val[0]\n";
         return $uid if ($$val[0] eq $handle)
     }
     return 0;
@@ -490,6 +488,13 @@ sub z_say {
     return msg($msg, $phrase);
 }
 
+sub z_social {
+    my ($whom, $action) = @_;
+    my $whomid = hereUser($whom);
+    return msg('nouserhere', $whom) unless $whomid;
+    return msg('social', $action, $whom);
+}
+
 sub z_teleport {
     my $where = $_[0];
     my $newLook = z_look($where, 1);
@@ -506,7 +511,7 @@ sub z_teleport {
 }
 
 sub z_walk {
-    my $dir = shift @_;
+    my $dir = lc(shift @_);
     for my $way (@{$$cur{'room'}{'w'}}) {
         my ($d0, $t0) = split / /, $way, 2;
         my ($d, $obj, $st) = splitAndFill(qr/\|/, $d0, 3);

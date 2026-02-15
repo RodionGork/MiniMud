@@ -18,5 +18,6 @@
     "noway-m": "You can't pass there|There is no way",
     "newuser-m": "Enter 'ready' if you want to start the game!",
     "nocmd-m": "Sorry, I don't understand that|Unknown command",
+    "social-m": "You $1 $2",
     "funny-m": "(so funny)"
 }
