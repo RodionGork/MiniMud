@@ -40,6 +40,8 @@ sub cmdMatchAndAct {
     return join "\n", @res;
 }
 
+sub handle { return kvop('h', @_); }
+
 sub hasObj {
     my ($where, $what, $state) = @_;
     my $objs = $$where{'o'};
@@ -71,11 +73,12 @@ sub initUser {
     my $uid = shift @_;
     my $user = {'rm' => 'start', 'o' => [], 'seen' => []};
     user($uid, $user);
-    my $handle = 'user-' . $uid;
+    my $handle = randomHandle();
     my $userd = {'h' => $handle, 'n' => 'Unknown'};
     userdata($uid, $userd);
+    handle($handle, $uid);
     my $roomst = roomstate('start') // {};
-    $$roomst{'u'}{$uid} = [$handle, $$cur{'ts'}];
+    $$roomst{'u'}{$uid} = [$handle, 0];
     roomstate('start', $roomst);
     return $user;
 }
@@ -184,9 +187,9 @@ sub newUserComes {
         my $cmds = meta('cmds');
         return msg('newuser') if ($$cmds{$cmd} ne 'Banzai! :)');
     }
-    print("Auto-creating user UID=$uid\n");
     initUser($uid);
-    return runCmd($uid, $cmd);
+    my $ud = userdata($uid);
+    return "Auto-creating user '$$ud{'h'}'\n" . runCmd($uid, $cmd);
 }
 
 sub numOrStr {
@@ -205,6 +208,16 @@ sub putObjInt {
     push @{$$roomst{'o'}}, [$oid, $st, $$obj{'d'}[$st]];
     roomstate($rid, $roomst);
     return '';
+}
+
+sub randomHandle {
+    my @pref = ('zaya', 'ptec', 'pchol', 'vowk', 'lisa', 'shmel', 'kyryn');
+    my $suff = 100;
+    while (1) {
+        my $h = $pref[int(rand(@pref))] . '-' . int(rand($suff));
+        return $h unless handle($h);
+        $suff *= 10;
+    }
 }
 
 sub room { return kvop('r', @_); }
