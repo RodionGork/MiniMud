@@ -28,7 +28,7 @@ look
 !addobj frog Cute Frog sits here with a small crown on her head #noget #s:pond
 !addway park nw pond
 !addway pond s park
-!addobj arrow feathered arrow with thin steel point #nodrop
+!addobj arrow feathered arrow with thin steel point #nodrop #nogive
 !addcmd pond kiss\s+frog [haveObj arrow] Frog smiled and flushed
 !addcmd pond kiss\s+frog Frog exclaimed "bloody zoophile", flushed and gave you a small arrow; @grant arrow
 !addobj pass white passcard | broken passkey #nodrop #s:park,pond #init:1

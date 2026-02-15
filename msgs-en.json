@@ -6,13 +6,17 @@
     "hereuser-m": "$1 stands here",
     "heresleep-m": "$1 sleeps here|$1 is resting here",
     "get-m": "$1 taken",
+    "give-m": "$1 given to $2",
     "drop-m": "$1 dropped",
+    "lost-m": "$1 inadvertently fell from your hands",
     "disint-m": "$1 have fallen to pieces just as it touched the ground",
     "disapp-m": "$1 have mystically disappeared as it touched the ground",
     "noobj-m": "Here is nothing like that!",
     "noget-m": "You can't take this!",
     "haveno-m": "You have nothing like that!",
+    "nouserhere-m": "You don't see such $1 here!",
     "noway-m": "You can't pass there|There is no way",
     "newuser-m": "Enter 'ready' if you want to start the game!",
-    "nocmd-m": "Sorry, I don't understand that|Unknown command"
+    "nocmd-m": "Sorry, I don't understand that|Unknown command",
+    "funny-m": "(so funny)"
 }

@@ -53,6 +53,17 @@ sub hasObj {
     return -1;
 }
 
+sub hereUser {
+    my ($handle) = @_;
+    my $users = $$cur{'roomst'}{'u'};
+    print "looking for $handle in $$cur{'rid'}\n";
+    while (my ($uid, $val) = each %$users) {
+        print "$uid : $$val[0]\n";
+        return $uid if ($$val[0] eq $handle)
+    }
+    return 0;
+}
+
 sub initObj {
     my @arg = split /\s+#/, $_[0];
     my @descr = split /\|/, shift @arg;
@@ -199,6 +210,27 @@ sub numOrStr {
 
 sub obj { return kvop('o', @_); }
 
+sub objFromRoom {
+    my $what = $_[0];
+    my $roomst = $$cur{'roomst'};
+    my $idx = hasObj($roomst, $what);
+    return msg('noobj') if ($idx < 0);
+    my $proto = obj($what);
+    return msg('noget') if (exists $$proto{'f'}{'noget'});
+    my $obj = splice @{$$roomst{'o'}}, $idx, 1;
+    return '', $what, $obj, $proto;
+}
+
+sub objFromUser {
+    my $what = $_[0];
+    my $user = $$cur{'user'};
+    my $idx = hasObj($user, $what);
+    return msg('haveno', $what) if ($idx < 0);
+    my $obj = splice @{$$user{'o'}}, $idx, 1;
+    my $proto = obj($$obj[0]);
+    return '', $what, $obj, $proto;
+}
+
 sub putObjInt {
     my ($rid, $oid, $st) = @_;
     my $roomst = roomstate($rid);
@@ -211,7 +243,7 @@ sub putObjInt {
 }
 
 sub randomHandle {
-    my @pref = ('zaya', 'ptec', 'pchol', 'vowk', 'lisa', 'shmel', 'kyryn');
+    my @pref = ('zaya', 'ptec', 'pchol', 'wowk', 'lissa', 'luan', 'kyrin');
     my $suff = 100;
     while (1) {
         my $h = $pref[int(rand(@pref))] . '-' . int(rand($suff));
@@ -368,13 +400,9 @@ sub w_save {
 }
 
 sub z_drop {
-    my $what = $_[0];
-    my $user = $$cur{'user'};
-    my $idx = hasObj($user, $what);
-    return msg('haveno') if ($idx < 0);
-    my $obj = splice @{$$user{'o'}}, $idx, 1;
-    my $proto = obj($$obj[0]);
-    user($$cur{'uid'}, $user);
+    my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
+    return $msg unless defined($obj);
+    user($$cur{'uid'}, $$cur{'user'});
     if (exists $$proto{'f'}{'nodrop'}) {
         my $room = instObj($what, $proto);
         return msg($room ? 'disapp' : 'disint', $what);
@@ -386,17 +414,31 @@ sub z_drop {
 }
 
 sub z_get {
-    my $what = $_[0];
-    my $roomst = $$cur{'roomst'};
-    my $idx = hasObj($roomst, $what);
-    return msg('noobj') if ($idx < 0);
-    my $proto = obj($what);
-    return msg('noget') if (exists $$proto{'f'}{'noget'});
-    my $obj = splice @{$$roomst{'o'}}, $idx, 1;
-    roomstate($$cur{'rid'}, $roomst);
+    my ($msg, $what, $obj, $proto) = objFromRoom($_[0]);
+    return $msg unless defined($obj);
+    roomstate($$cur{'rid'}, $$cur{'roomst'});
     push @{$$cur{'user'}{'o'}}, $obj;
     user($$cur{'uid'}, $$cur{'user'});
     return msg('get', $what);
+}
+
+sub z_give {
+    my $whom = $_[1];
+    my $whomid = hereUser($whom);
+    return msg('nouserhere', $whom) unless $whomid;
+    my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
+    return $msg unless defined($obj);
+    user($$cur{'uid'}, $$cur{'user'});
+    if (exists $$proto{'f'}{'nogive'}) {
+        my $room = instObj($what, $proto);
+        return msg('lost', $what) . "\n" . msg($room ? 'disapp' : 'disint', $what);
+    }
+    my $recipient = user($whomid);
+    push @{$$recipient{'o'}}, $obj;
+    user($whomid, $recipient);
+    my $res = msg('give', $what, $whom);
+    $res .= ' ' . msg('funny') if $$cur{'uid'} eq $whomid;
+    return $res;
 }
 
 sub z_grant {

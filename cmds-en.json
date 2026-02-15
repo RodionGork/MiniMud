@@ -3,6 +3,7 @@
         ["look", "@look"],
         ["get\\s+(\\S+)", "@get $1"],
         ["drop\\s+(\\S+)", "@drop $1"],
+        ["give\\s+(\\S+)(?:\\s+to)?\\s+(\\S+)", "@give $1 $2"],
         ["(?:go\\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out)", "@walk $1"],
         ["say\\s+(\\S.*)", "@say $1"],
         ["ready", "Banzai! :)"],
