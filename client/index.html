@@ -1,0 +1,50 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MiniMUD</title>
+  <style>
+    body {font-family: sans-serif; background-color: #000; color: #ccc }
+    input { width: 100%}
+    .useract { color: #bbf; font-weight: bold }
+    @media screen and (orientation: landscape) {
+      div{ width: 800px; margin: 1px auto; }
+    }
+}  </style>
+</head>
+<body>
+
+<div class="machine">
+  <b>Hi there! Welcome to our virtual world.</b>
+  <br/>
+  I'll be your eyes and shall be telling whatever happens around.
+  And you'll type in commands telling me what to do.
+</div>
+
+<div>
+  <input type="text" id="command" placeholder="your command, master:"/>
+</div>
+<script>
+
+var input = document.getElementById('command');
+
+input.onkeydown = function() {
+    if (event.key != 'Enter') return;
+    var cmd = input.value.trim();
+    if (cmd == '') return;
+    addDiv('useract', cmd);
+    setTimeout(() => addDiv('machine', 'Sorry I do not understand'), 700);
+    input.value = '';
+}
+
+function addDiv(cls, text) {
+    var div = document.createElement('div');
+    div.classList.add(cls);
+    div.innerText = text;
+    document.body.insertBefore(div, input.parentElement);
+    document.body.scrollTo(0, document.body.scrollHeight - document.body.clientHeight);
+}
+
+</script>
+</body>
+</html>
