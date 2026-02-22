@@ -4,11 +4,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>MiniMUD</title>
   <style>
-    body {font-family: sans-serif; background-color: #000; color: #ccc }
-    input { width: 100%}
+    body {font-family: sans-serif; background-color: #000; color: #aaa }
+    input { width: 100%; background-color: #444; color: #3f3; font-family: monospace; font-weight: bold; border-radius: 5px; padding: 5px; }
     .useract { color: #bbf; font-weight: bold }
     @media screen and (orientation: landscape) {
-      div{ width: 800px; margin: 1px auto; }
+      div{ width: 800px; margin: 3px auto; }
     }
 }  </style>
 </head>
@@ -32,8 +32,7 @@ input.onkeydown = function() {
     if (event.key != 'Enter') return;
     var cmd = input.value.trim();
     if (cmd == '') return;
-    addDiv('useract', cmd);
-    setTimeout(() => addDiv('machine', 'Sorry I do not understand'), 700);
+    sendCmd(cmd);
     input.value = '';
 }
 
@@ -43,6 +42,34 @@ function addDiv(cls, text) {
     div.innerText = text;
     document.body.insertBefore(div, input.parentElement);
     document.body.scrollTo(0, document.body.scrollHeight - document.body.clientHeight);
+}
+
+function sendCmd(cmd) {
+    addDiv('useract', cmd);
+    var m = location.href.match(/\?token\=([0-9a-zA-Z_\-]+)/);
+    if (m === null) {
+        respond('You need a magical token to communnicate to server!');
+        return;
+    }
+    var token = m[1];
+    var url = urlFromToken(m[1]);
+    fetch(url, {
+        method: 'POST', body: m[1] + '\n' + cmd
+    }).then((resp) => {
+        if (resp.status != 200) {
+            respond('Sorry, exchange error: ' + resp.status);
+        } else {
+            resp.text().then((data) => respond(data));
+        }
+    }).catch((err) => respond('Ah, oh, error: ' + err));
+}
+
+function respond(text) {
+    addDiv('machine', text);
+}
+
+function urlFromToken(token) {
+    return atob(token.substr(27)).split(' ')[1];
 }
 
 </script>

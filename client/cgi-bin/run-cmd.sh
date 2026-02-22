@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 cd ../..
-perl ./cgi.pl
+TOKEN_SECRET=bla perl ./cgi.pl
 cd client/cgi-bin
