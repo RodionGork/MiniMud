@@ -1,7 +1,9 @@
 {
-    "said-m": "You mumbled: $1",
-    "asked-m": "You asked: $1",
-    "excld-m": "You exclaimed: $1",
+    "said-m": "$1 mumbled: $2",
+    "asked-m": "$1 asked: $2",
+    "excld-m": "$1 exclaimed: $2",
+    "enters-m": "enters $1",
+    "exits-m": "exits $1",
     "hereare-m": "Here are: $1",
     "hereuser-m": "$1 stands here",
     "heresleep-m": "$1 sleeps here|$1 is resting here",

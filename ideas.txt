@@ -1,7 +1,7 @@
+- intro from db
+- default name prefixes from db
+- stay awake on other commands besides travel
 - objects expiration
-- talking between users
-- talking in groups
-- object exchanging
 - wizard impersonation
 - synonyms for objects
 - user registering and banning
@@ -28,3 +28,7 @@
 * random object placement
 * conditional command fallbacks
 * showing other users
+* talking between users and in groups (as part of user events)
+* user events list
+* object exchanging
+

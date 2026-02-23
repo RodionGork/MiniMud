@@ -32,6 +32,7 @@ input.onkeydown = function() {
     if (event.key != 'Enter') return;
     var cmd = input.value.trim();
     if (cmd == '') return;
+    addDiv('useract', cmd);
     sendCmd(cmd);
     input.value = '';
 }
@@ -44,8 +45,10 @@ function addDiv(cls, text) {
     document.body.scrollTo(0, document.body.scrollHeight - document.body.clientHeight);
 }
 
+var commError = false;
+
 function sendCmd(cmd) {
-    addDiv('useract', cmd);
+    nextEventCheck = new Date().getTime() + 4000 + Math.round(Math.random() * 3000);
     var m = location.href.match(/\?token\=([0-9a-zA-Z_\-]+)/);
     if (m === null) {
         respond('You need a magical token to communnicate to server!');
@@ -57,21 +60,39 @@ function sendCmd(cmd) {
         method: 'POST', body: m[1] + '\n' + cmd
     }).then((resp) => {
         if (resp.status != 200) {
-            respond('Sorry, exchange error: ' + resp.status);
+            if (!commError)
+                respond('Sorry, exchange error: ' + resp.status);
+            commError = true;
         } else {
+            commError = false;
             resp.text().then((data) => respond(data));
         }
-    }).catch((err) => respond('Ah, oh, error: ' + err));
+    }).catch((err) => {
+        if (!commError)
+            respond('Ah, oh, error: ' + err)
+        commError = true;
+    });
 }
 
 function respond(text) {
-    addDiv('machine', text);
+    if (text.trim() !== '')
+        addDiv('machine', text);
 }
 
 function urlFromToken(token) {
     return atob(token.substr(27)).split(' ')[1];
 }
 
+var nextEventCheck = 0;
+
+function eventsCheck() {
+    var cur = new Date().getTime();
+    if (nextEventCheck > cur)
+        return;
+    sendCmd('chkevt');
+}
+
+setInterval(eventsCheck, 1000 + Math.floor(Math.random()*100));
 </script>
 </body>
 </html>

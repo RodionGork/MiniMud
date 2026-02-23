@@ -80,7 +80,7 @@ sub initRoom {
 
 sub initUser {
     my $uid = shift @_;
-    my $user = {'rm' => 'start', 'o' => [], 'seen' => []};
+    my $user = {'rm' => 'start', 'o' => [], 'seen' => [], 'ev' => []};
     user($uid, $user);
     my $handle = randomHandle();
     my $userd = {'h' => $handle, 'n' => 'Unknown'};
@@ -154,6 +154,10 @@ sub instObj {
     return $room;
 }
 
+sub isAwake {
+    return $$cur{'ts'} - $_[0] <= 90;
+}
+
 sub kvop {
     my $suffix = shift @_;
     my $key = (shift @_) . '-' . $suffix;
@@ -199,6 +203,19 @@ sub newUserComes {
     initUser($uid);
     my $ud = userdata($uid);
     return "Auto-creating user '$$ud{'h'}'\n" . runCmd($uid, $cmd);
+}
+
+sub notify {
+    my $msg = $_[0];
+    my $uid = $$cur{'uid'};
+    my $rs = @_ < 2 ? $$cur{'roomst'} : $_[1];
+    while (my ($id, $urec) = each %{$$rs{'u'}}) {
+        next if $id eq $uid;
+        next unless isAwake($$urec[1]);
+        my $other = user($id);
+        push @{$$other{'ev'}}, $msg;
+        user($id, $other);
+    }
 }
 
 sub numOrStr {
@@ -250,6 +267,14 @@ sub randomHandle {
     }
 }
 
+sub reportEvents {
+    my ($uid, $user) = @_;
+    my $res = join "\n", @{$$user{'ev'}};
+    $$user{'ev'} = [];
+    user($uid, $user);
+    return $res;
+}
+
 sub room { return kvop('r', @_); }
 sub roomstate { return kvop('rs', @_); }
 
@@ -257,8 +282,11 @@ sub runCmd {
     my ($uid, $cmd) = @_;
     my ($verb, $tail) = splitAndFill(' ', $cmd, 2);
     my $us = user($uid);
-    my $ud = userdata($uid);
     return newUserComes($uid, $cmd) unless ($us);
+    my $events = reportEvents($uid, $us);
+    return $events if $cmd eq 'chkevt';
+    $events .= "\n" if $events ne '';
+    my $ud = userdata($uid);
     my $rid = $$us{'rm'};
     my $room = room($rid) // {};
     my $roomst = roomstate($rid) // {};
@@ -266,12 +294,12 @@ sub runCmd {
     my @cmds = @{$$room{'c'} // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
-        return $res if ($res); 
+        return $events . $res if ($res); 
     }
     @cmds = @{meta('cmds') // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
-        return $res if ($res); 
+        return $events . $res if ($res); 
     }
     if ($verb eq 'wizpwd' && $tail eq $wizPwd) {
         $$us{'wiz'} = $$cur{'ts'} + 600;
@@ -283,7 +311,7 @@ sub runCmd {
         return wizCmd(substr $cmd, 1) if ($firstLtr eq '!');
         return inspect($cmd) if ($firstLtr eq '/');
     }
-    return msg('nocmd');
+    return $events . msg('nocmd');
 }
 
 sub splitAndFill {
@@ -474,7 +502,7 @@ sub z_look {
     for my $u (keys %{$$roomst{'u'}}) {
         next if ($u == $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
-        $res .= "\n" .msg($$cur{'ts'} - $urec[1] < 60 ? 'hereuser' : 'heresleep', $urec[0]);
+        $res .= "\n" .msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
     }
     markSeen($rid);
     return $res;
@@ -485,7 +513,9 @@ sub z_say {
     $phrase = trim($phrase);
     my $lastchr = substr $phrase, -1;
     my $msg = $lastchr eq '?' ? 'asked' : ($lastchr eq '!' ? 'excld' : 'said');
-    return msg($msg, $phrase);
+    $msg = msg($msg, $$cur{'userd'}{'h'}, $phrase);
+    notify($msg);
+    return $msg;
 }
 
 sub z_social {
@@ -499,14 +529,17 @@ sub z_teleport {
     my $where = $_[0];
     my $newLook = z_look($where, 1);
     my $us = $$cur{'user'};
+    my $h = $$cur{'userd'}{'h'};
     my $uid = $$cur{'uid'};
     $$us{'rm'} = $where;
     user($uid, $us);
     delete($$cur{'roomst'}{'u'}{$uid});
     roomstate($$cur{'rid'}, $$cur{'roomst'});
     my $rsnew = roomstate($where);
-    $$rsnew{'u'}{$uid} = [$$cur{'userd'}{'h'}, $$cur{'ts'}];
+    $$rsnew{'u'}{$uid} = [$h, $$cur{'ts'}];
     roomstate($where, $rsnew);
+    notify(msg('exits', $h));
+    notify(msg('enters', $h), $rsnew);
     return $newLook;
 }
 
