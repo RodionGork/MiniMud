@@ -1,4 +1,5 @@
 use v5.16;
+use open ':std', ':encoding(UTF-8)';
 use warnings;
 use File::Basename;
 use lib dirname(__FILE__);

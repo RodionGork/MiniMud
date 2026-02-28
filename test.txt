@@ -31,7 +31,7 @@ look
 !addobj arrow feathered arrow with thin steel point #nodrop #nogive
 !addcmd pond kiss\s+frog [haveObj arrow] Frog smiled and flushed
 !addcmd pond kiss\s+frog Frog exclaimed "bloody zoophile", flushed and gave you a small arrow; @grant arrow
-!addobj pass white passcard | broken passkey #nodrop #s:park,pond #init:1
+!addobj pass:passkey,passcard,keycard white passcard | broken passkey #nodrop #s:park,pond #init:1
 say Here is no hren!
 get hren
 get ball

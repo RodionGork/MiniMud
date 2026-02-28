@@ -3,7 +3,7 @@
     вдоль розового здания школы; дыра в ограде виднеется к северу.
 !addobj мяч увесистый футбольный мяч
 !putobj start мяч
-!addobj пропуск белая карта-пропуск|сломанный школьный пропуск
+!addobj pass:пропуск,карта|карту белая карта-пропуск|сломанный школьный пропуск
 !import cmds-ru.json
 !import msgs-ru.json
 огл
@@ -11,12 +11,12 @@
     в листве чирикают птички; дыра в заборе ведёт на юго-запад.
 !addway start с park
 !addway park юз start
-!putobj park пропуск 1
+!putobj park pass 1
 !addroom yard Школьный двор|Не столько двор, а дорожка вдоль здания\
     и газончик вдоль дорожки - тянутся с востока на запад. Растут\
     ёлочки, видны несколько клумб.
-!addway start в|пропуск yard|passkey helps to pass the gates...
-!addway yard з|пропуск|0 start
+!addway start в|pass yard|passkey helps to pass the gates...
+!addway yard з|pass|0 start
 !addway start в |Через ворота так просто не перелезть...
 !addcmd start исп(?:ольз)?\s+пропуск @haveObj pass teleport yard
 взять хрен

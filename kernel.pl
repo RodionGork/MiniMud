@@ -48,7 +48,7 @@ sub hasObj {
     return -1 unless $objs;
     for my $i (keys @$objs) {
         my $obj = $$objs[$i];
-        return $i if ($what eq $$obj[0] && (!defined($state) || $state eq $$obj[1]));
+        return $i if (objNameMatch($what, 1, $$obj[0], $$obj[3]) && (!defined($state) || $state eq $$obj[1]));
     }
     return -1;
 }
@@ -63,10 +63,11 @@ sub hereUser {
 }
 
 sub initObj {
-    my @arg = split /\s+#/, $_[0];
+    my ($text, $synonyms) = @_;
+    my @arg = split /\s+#/, $text;
     my @descr = split /\|/, shift @arg;
     $_ = trim($_) for (@descr);
-    my $res = {'d' => \@descr, 'f' => {}};
+    my $res = {'d' => \@descr, 'f' => {}, 's' => $synonyms};
     for my $flag (@arg) {
         my ($f, $v) = split /:/, $flag;
         $$res{'f'}{$f} = numOrStr($v||1);
@@ -246,13 +247,23 @@ sub objFromUser {
     return '', $what, $obj, $proto;
 }
 
+sub objNameMatch {
+    my ($name, $flex, $oid, $syn) = @_;
+    return 1 if $name eq $oid;
+    for my $s (split /\,/, $syn) {
+        my @cases = split /\|/, $s;
+        return 1 if $name eq $cases[$flex < @cases ? $flex : 0];
+    }
+    return 0;
+}
+
 sub putObjInt {
     my ($rid, $oid, $st) = @_;
     my $roomst = roomstate($rid);
     return 'No such room' unless ($roomst);
     my $obj = obj($oid);
     return 'No such object' unless ($obj);
-    push @{$$roomst{'o'}}, [$oid, $st, $$obj{'d'}[$st]];
+    push @{$$roomst{'o'}}, [$oid, $st, $$obj{'d'}[$st], $$obj{'s'}];
     roomstate($rid, $roomst);
     return '';
 }
@@ -294,12 +305,12 @@ sub runCmd {
     my @cmds = @{$$room{'c'} // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
-        return $events . $res if ($res); 
+        return $events . $res if ($res);
     }
     @cmds = @{meta('cmds') // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
-        return $events . $res if ($res); 
+        return $events . $res if ($res);
     }
     if ($verb eq 'wizpwd' && $tail eq $wizPwd) {
         $$us{'wiz'} = $$cur{'ts'} + 600;
@@ -354,8 +365,9 @@ sub w_addcmd {
 }
 
 sub w_addobj {
-    my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
-    my $proto = initObj $descr;
+    my ($tag, $descr) = splitAndFill(' ', $_[0], 2);
+    my ($oid, $synonyms) = splitAndFill(':', $tag, 2);
+    my $proto = initObj $descr, $synonyms;
     obj($oid, $proto);
     my $where = instObj($oid, $proto);
     if ($where) {
