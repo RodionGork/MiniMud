@@ -4,7 +4,13 @@ use File::Basename;
 use lib dirname(__FILE__);
 use JSON::PP;
 require ($ENV{'MUD_KV'} // 'kvdbm.pl');
-require "lang-$ENV{'MUD_LANG'}.pl" if exists $ENV{'MUD_LANG'};
+
+my $lang = $ENV{'MUD_LANG'} // '';
+if ($lang) {
+    require "lang-$lang.pl";
+} else {
+    $lang = 'en';
+}
 
 our $autoCreateUser = 0;
 our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
@@ -210,13 +216,21 @@ sub msgs { return kvop('m', @_); }
 
 sub newUserComes {
     my ($uid, $cmd) = @_;
-    if (!$autoCreateUser) {
-        my $cmds = meta('cmds');
-        return msg('newuser') if ($$cmds{$cmd} ne 'Banzai! :)');
+    my $cmds = meta('cmds') // [];
+    if (!@{$cmds}) {
+        w_import("cmds-$lang.json");
+        w_import("msgs-$lang.json");
+        $cmds = meta('cmds');
     }
-    initUser($uid);
-    my $ud = userdata($uid);
-    return "Auto-creating user '$$ud{'h'}'\n" . runCmd($uid, $cmd);
+    for my $c (@$cmds) {
+        my @m = ($cmd =~ /^$$c[0]$/i);
+        if (@m && $$c[1] eq 'Banzai! :)') {
+            initUser($uid);
+            my $ud = userdata($uid);
+            return msg('greetnew');
+        }
+    }
+    return msg('newuser');
 }
 
 sub notify {

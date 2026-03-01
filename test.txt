@@ -8,8 +8,6 @@
 !addmsg said You mumbled: $1
 !addobj ball heavy leather ball
 !putobj start ball
-!import cmds-en.json
-!import msgs-en.json
 look
 !addroom park In the park|You are wandering in a green park,\
     with birds chirping above; hole in the fence is to SE and\

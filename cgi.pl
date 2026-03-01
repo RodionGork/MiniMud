@@ -5,8 +5,6 @@ use lib dirname(__FILE__);
 require 'kernel.pl';
 require 'tokens.pl';
 
-our $autoCreateUser = 1;
-
 my $tkn = <>;
 chomp $tkn;
 my ($uid, $srv, $ts) = parseToken($tkn);

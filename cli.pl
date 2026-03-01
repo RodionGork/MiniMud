@@ -5,8 +5,6 @@ use File::Basename;
 use lib dirname(__FILE__);
 require 'kernel.pl';
 
-our $autoCreateUser = 1;
-
 if (@ARGV < 1) {
     print "Please specify Uid as a first argument!\n";
     exit(1);
@@ -20,8 +18,13 @@ if (@ARGV > 1) {
         print "executing: $cmd\n" . runCmd($uid, $cmd) . "\n";
     }
 } else {
-    print "Auto executing 'look' command...\n";
-    print runCmd($uid, 'look') . "\n";
+    my $cmds = meta('cmds');
+    my $lookcmd = '';
+    for my $c (@$cmds) {
+        $lookcmd = $$c[0] if ($$c[1] eq '@look');
+    }
+    print "Auto executing '$lookcmd' command...\n";
+    print runCmd($uid, $lookcmd) . "\n";
 }
 
 while (1) {

@@ -19,6 +19,7 @@
     "nouserhere-m": "You don't see such $1 here!",
     "noway-m": "You can't pass there|There is no way",
     "newuser-m": "Enter 'ready' if you want to start the game!",
+    "greetnew-m": "Welcome to the game, start with entering 'look' command",
     "nocmd-m": "Sorry, I don't understand that|Unknown command",
     "social-m": "You $1 $2",
     "funny-m": "(so funny)",
