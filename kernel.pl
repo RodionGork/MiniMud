@@ -4,6 +4,7 @@ use File::Basename;
 use lib dirname(__FILE__);
 use JSON::PP;
 require ($ENV{'MUD_KV'} // 'kvdbm.pl');
+require "lang-$ENV{'MUD_LANG'}.pl" if exists $ENV{'MUD_LANG'};
 
 our $autoCreateUser = 0;
 our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
@@ -84,7 +85,7 @@ sub initUser {
     my $user = {'rm' => 'start', 'o' => [], 'seen' => [], 'ev' => []};
     user($uid, $user);
     my $handle = randomHandle();
-    my $userd = {'h' => $handle, 'n' => 'Unknown'};
+    my $userd = {'h' => $handle, 'n' => 'Unknown', 'g' => 'f'};
     userdata($uid, $userd);
     handle($handle, $uid);
     my $roomst = roomstate('start') // {};
@@ -190,6 +191,18 @@ sub msg {
     my @msg = split /\|/, $msg;
     $msg = $msg[int(rand(@msg))];
     $msg =~ s/\$(\d)/$_[$1-1]/ge;
+    if (index($msg, '$u') >= 0) {
+        my $person = $$cur{'userd'}{'h'};
+        my $msg1 = $msg;
+        $msg1 =~ s/\$u/$person/;
+        $person = you();
+        $msg =~ s/\$u/$person/;
+        if (defined(&amendMsg)) {
+            $msg = amendMsg($msg, 'p');
+            $msg1 = amendMsg($msg1, $$cur{'userd'}{'g'});
+        }
+        notify($msg1);
+    }
     return $msg;
 }
 
@@ -209,7 +222,7 @@ sub newUserComes {
 sub notify {
     my $msg = $_[0];
     my $uid = $$cur{'uid'};
-    my $rs = @_ < 2 ? $$cur{'roomst'} : $_[1];
+    my $rs = $$cur{'roomst'};
     while (my ($id, $urec) = each %{$$rs{'u'}}) {
         next if $id eq $uid;
         next unless isAwake($$urec[1]);
@@ -437,6 +450,12 @@ sub w_save {
     return "data file $fname saved";
 }
 
+sub you {
+    state $you;
+    $you = msg('you') unless defined($you);
+    return $you;
+}
+
 sub z_drop {
     my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
     return $msg unless defined($obj);
@@ -514,7 +533,7 @@ sub z_look {
     for my $u (keys %{$$roomst{'u'}}) {
         next if ($u == $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
-        $res .= "\n" .msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
+        $res .= "\n" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
     }
     markSeen($rid);
     return $res;
@@ -525,8 +544,7 @@ sub z_say {
     $phrase = trim($phrase);
     my $lastchr = substr $phrase, -1;
     my $msg = $lastchr eq '?' ? 'asked' : ($lastchr eq '!' ? 'excld' : 'said');
-    $msg = msg($msg, $$cur{'userd'}{'h'}, $phrase);
-    notify($msg);
+    $msg = msg($msg, $phrase);
     return $msg;
 }
 
@@ -550,8 +568,10 @@ sub z_teleport {
     my $rsnew = roomstate($where);
     $$rsnew{'u'}{$uid} = [$h, $$cur{'ts'}];
     roomstate($where, $rsnew);
-    notify(msg('exits', $h));
-    notify(msg('enters', $h), $rsnew);
+    msg('exits', $h);
+    $$cur{'rid'} = $where;
+    $$cur{'roomst'} = $rsnew;
+    msg('enters', $h);
     return $newLook;
 }
 

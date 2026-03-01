@@ -1,9 +1,9 @@
 {
-    "said-m": "$1 mumbled: $2",
-    "asked-m": "$1 asked: $2",
-    "excld-m": "$1 exclaimed: $2",
-    "enters-m": "enters $1",
-    "exits-m": "exits $1",
+    "said-m": "$u mumbled: $1",
+    "asked-m": "$u asked: $1",
+    "excld-m": "$u exclaimed: $1",
+    "enters-m": "enters $u",
+    "exits-m": "exits $u",
     "hereare-m": "Here are: $1",
     "hereuser-m": "$1 stands here",
     "heresleep-m": "$1 sleeps here|$1 is resting here",
@@ -21,5 +21,6 @@
     "newuser-m": "Enter 'ready' if you want to start the game!",
     "nocmd-m": "Sorry, I don't understand that|Unknown command",
     "social-m": "You $1 $2",
-    "funny-m": "(so funny)"
+    "funny-m": "(so funny)",
+    "you-m": "You"
 }
