@@ -42,7 +42,13 @@ sub cmdMatchAndAct {
     my @res = ();
     my @acts = split /\s*;\s*/, $act;
     for my $a (@acts) {
-        push @res, ((substr($a, 0, 1) ne '@') ? $a : action(split(/ /, substr($a, 1))));
+        if (substr($a, 0, 1) eq '@') {
+            my @aa = action(split(/ /, substr($a, 1)));
+            push @res, $aa[0];
+            last if @aa > 1 && $aa[1];
+        } else {
+            push @res, $a;
+        }
     }
     return join "\n", @res;
 }
@@ -468,6 +474,26 @@ sub you {
     state $you;
     $you = msg('you') unless defined($you);
     return $you;
+}
+
+sub z_chgender {
+    my $gen = substr $_[0], 0, 1;
+    $$cur{'userd'}{'g'} = $gen;
+    userdata($$cur{'uid'}, $$cur{'userd'});
+    return msg("gender.$gen");
+}
+
+sub z_chname {
+    my ($nom, $gen, $dat, $acc) = @_;
+    if (handle($nom)) {
+        return (msg('nameexists'), 1);
+    }
+    handle($$cur{'userd'}{'h'}, '!del');
+    handle($nom, $$cur{'uid'});
+    $$cur{'userd'}{'n'} = "$gen $dat $acc";
+    $$cur{'userd'}{'h'} = $nom;
+    userdata($$cur{'uid'}, $$cur{'userd'});
+    return msg('namechanged', $nom);
 }
 
 sub z_drop {

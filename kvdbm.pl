@@ -11,7 +11,11 @@ $dbobj->Filter_Push('utf8');
 
 sub kvset {
     my ($k, $v) = @_;
-    $kv{$k} = $json->encode($v);
+    if ($v ne '!del') {
+        $kv{$k} = $json->encode($v);
+    } else {
+        delete $kv{$k};
+    }
 }
 
 sub kvget {
