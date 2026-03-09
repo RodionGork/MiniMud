@@ -493,7 +493,7 @@ sub z_chname {
     $$cur{'userd'}{'n'} = "$gen $dat $acc";
     $$cur{'userd'}{'h'} = $nom;
     userdata($$cur{'uid'}, $$cur{'userd'});
-    return msg('namechanged', $nom);
+    return msg('namechanged', $nom, $gen, $dat, $acc);
 }
 
 sub z_drop {

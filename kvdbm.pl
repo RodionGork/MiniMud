@@ -1,12 +1,12 @@
 use v5.16;
 use warnings;
 use JSON::PP;
-use SDBM_File;
+use GDBM_File;
 use DBM_Filter;
 use Fcntl;
 
 my $json = JSON::PP->new->allow_nonref;
-my $dbobj = tie(my %kv, 'SDBM_File', 'gamedata.sdbm', O_RDWR|O_CREAT, 0640) or die('no sdbm');
+my $dbobj = tie(my %kv, 'GDBM_File', 'gamedata.gdbm', O_RDWR|O_CREAT, 0640) or die('no gdbm');
 $dbobj->Filter_Push('utf8');
 
 sub kvset {
