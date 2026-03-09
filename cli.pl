@@ -37,6 +37,7 @@ while (1) {
     }
     if ($ur eq 'quit') {
         print "ok, bye!\n";
+        dbcommit();
         last;
     }
     my $resp = runCmd($uid, trim($ur));

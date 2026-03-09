@@ -3,7 +3,7 @@ use warnings;
 use File::Basename;
 use lib dirname(__FILE__);
 use JSON::PP;
-require ($ENV{'MUD_KV'} // 'kvdbm.pl');
+require ($ENV{'MUD_KV'} // 'dbsql.pl');
 
 my $lang = $ENV{'MUD_LANG'} // '';
 if ($lang) {

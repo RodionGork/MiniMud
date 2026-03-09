@@ -16,6 +16,7 @@ print "Content-Type: text/plain\r\n\r\n";
 
 if ($uid ne '') {
     print runCmd($uid, $cmd);
+    dbcommit();
 } else {
     print 'Something bad happened to your token, perhaps re-login :(';
 }
