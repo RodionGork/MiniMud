@@ -67,12 +67,15 @@ sub hasObj {
 }
 
 sub hereUser {
-    my ($handle) = @_;
+    my $target = $_[0];
+    my $case = @_ > 1 ? $_[1] : 0;
     my $users = $$cur{'roomst'}{'u'};
-    while (my ($uid, $val) = each %$users) {
-        return $uid if ($$val[0] eq $handle)
+    for my $uid (keys %$users) {
+        my $val = $$users{$uid};
+        my $name = $case ? ((split / /, $$val[2])[$case-1]) : $$val[0];
+        return $uid, $name if ($name eq $target)
     }
-    return 0;
+    return 0, '';
 }
 
 sub initObj {
@@ -101,7 +104,7 @@ sub initUser {
     userdata($uid, $userd);
     handle($handle, $uid);
     my $roomst = roomstate('start') // {};
-    $$roomst{'u'}{$uid} = [$handle, 0];
+    $$roomst{'u'}{$uid} = [$handle, 0, $$userd{'n'}];
     roomstate('start', $roomst);
     return $user;
 }
@@ -213,7 +216,16 @@ sub msg {
             $msg = amendMsg($msg, 'p');
             $msg1 = amendMsg($msg1, $$cur{'userd'}{'g'});
         }
-        notify($msg1);
+        my ($whomid, $msg2) = ('', '');
+        if (index($msg, '$v') >= 0) {
+            my $whom = pop @_;
+            $whomid = pop @_;
+            $msg =~ s/\$v/$whom/;
+            $msg2 = $msg1;
+            $msg1 =~ s/\$v/$whom/;
+            $msg2 =~ s/\$v/you(3)/e;
+        }
+        notify($msg1, $whomid, $msg2);
     }
     return $msg;
 }
@@ -240,14 +252,16 @@ sub newUserComes {
 }
 
 sub notify {
-    my $msg = $_[0];
+    my ($msg, $whomid, $msg2) = @_;
     my $uid = $$cur{'uid'};
     my $rs = $$cur{'roomst'};
-    while (my ($id, $urec) = each %{$$rs{'u'}}) {
+    my $users = $$rs{'u'};
+    for my $id (keys %$users) {
+        my $urec = $$users{$id};
         next if $id eq $uid;
         next unless isAwake($$urec[1]);
         my $other = user($id);
-        push @{$$other{'ev'}}, $msg;
+        push @{$$other{'ev'}}, ($id ne $whomid ? $msg : $msg2);
         user($id, $other);
     }
 }
@@ -471,9 +485,16 @@ sub w_save {
 }
 
 sub you {
-    state $you;
-    $you = msg('you') unless defined($you);
-    return $you;
+    my $case = $_[0] // 0;
+    state @you;
+    unless (@you) {
+        my $youstr = msg('you');
+        @you = split / /, $youstr;
+        while (@you < 4) {
+            push @you, $you[0];
+        }
+    }
+    return $you[$case];
 }
 
 sub z_chgender {
@@ -493,6 +514,10 @@ sub z_chname {
     $$cur{'userd'}{'n'} = "$gen $dat $acc";
     $$cur{'userd'}{'h'} = $nom;
     userdata($$cur{'uid'}, $$cur{'userd'});
+    my $userinroom = $$cur{'roomst'}{'u'}{$$cur{'uid'}};
+    $$userinroom[0] = $nom;
+    $$userinroom[2] = $$cur{'userd'}{'n'};
+    roomstate($$cur{'rid'}, $$cur{'roomst'});
     return msg('namechanged', $nom, $gen, $dat, $acc);
 }
 
@@ -521,7 +546,7 @@ sub z_get {
 
 sub z_give {
     my $whom = $_[1];
-    my $whomid = hereUser($whom);
+    my ($whomid, $nameCase) = hereUser($whom, 2);
     return msg('nouserhere', $whom) unless $whomid;
     my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
     return $msg unless defined($obj);
@@ -590,9 +615,9 @@ sub z_say {
 
 sub z_social {
     my ($whom, $action) = @_;
-    my $whomid = hereUser($whom);
+    my ($whomid, $nameCase) = hereUser($whom, 3);
     return msg('nouserhere', $whom) unless $whomid;
-    return msg('social', $action, $whom);
+    return msg('social', $action, $whomid, $whom);
 }
 
 sub z_teleport {
@@ -603,10 +628,12 @@ sub z_teleport {
     my $uid = $$cur{'uid'};
     $$us{'rm'} = $where;
     user($uid, $us);
+    my $userinroom = $$cur{'roomst'}{'u'}{$uid};
     delete($$cur{'roomst'}{'u'}{$uid});
     roomstate($$cur{'rid'}, $$cur{'roomst'});
     my $rsnew = roomstate($where);
-    $$rsnew{'u'}{$uid} = [$h, $$cur{'ts'}];
+    $$userinroom[1] = $$cur{'ts'};
+    $$rsnew{'u'}{$uid} = $userinroom;
     roomstate($where, $rsnew);
     msg('exits', $h);
     $$cur{'rid'} = $where;
