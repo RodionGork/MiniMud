@@ -220,10 +220,10 @@ sub msg {
         if (index($msg, '$v') >= 0) {
             my $whom = pop @_;
             $whomid = pop @_;
-            $msg =~ s/\$v/$whom/;
+            $msg =~ s/\$v\d/$whom/;
             $msg2 = $msg1;
-            $msg1 =~ s/\$v/$whom/;
-            $msg2 =~ s/\$v/you(3)/e;
+            $msg1 =~ s/\$v\d/$whom/;
+            $msg2 =~ s/\$v(\d)/you($1)/e;
         }
         notify($msg1, $whomid, $msg2);
     }
@@ -558,7 +558,7 @@ sub z_give {
     my $recipient = user($whomid);
     push @{$$recipient{'o'}}, $obj;
     user($whomid, $recipient);
-    my $res = msg('give', $what, $whom);
+    my $res = msg('give', $what, $whomid, $whom);
     $res .= ' ' . msg('funny') if $$cur{'uid'} eq $whomid;
     return $res;
 }
