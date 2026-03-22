@@ -15,6 +15,8 @@ if ($lang) {
 our $autoCreateUser = 0;
 our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
 our $pathMem = 20;
+our $goSleepTime = 90;
+our $goExpiredTime = 180;
 
 my $cur;
 
@@ -25,6 +27,7 @@ sub action {
         my $v = $_[$i];
         $_[$i] = $$matches[substr($v, 1)-1] if ($v =~ /^\$\d/);
     }
+    updateUserTimestamp();
     return &$fn(@_);
 }
 
@@ -177,7 +180,7 @@ sub instObj {
 }
 
 sub isAwake {
-    return $$cur{'ts'} - $_[0] <= 90;
+    return $$cur{'ts'} - $_[0] <= $goSleepTime;
 }
 
 sub kvop {
@@ -389,6 +392,15 @@ sub splitAndFill {
 sub trim {
     $_[0] =~ s/^\s+|\s$//g;
     return $_[0];
+}
+
+sub updateUserTimestamp {
+    my $roomst = $$cur{'roomst'};
+    my $uid = $$cur{'uid'};
+    if ($$cur{'ts'} - $$roomst{'u'}{$uid}[1] > $goSleepTime/2) {
+        $$roomst{'u'}{$uid}[1] = $$cur{'ts'};
+        roomstate($$cur{'rid'}, $roomst)
+    }
 }
 
 sub user { return kvop('u', @_); }
