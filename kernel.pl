@@ -17,6 +17,7 @@ our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
 our $pathMem = 20;
 our $goSleepTime = 90;
 our $goExpiredTime = 180;
+our $maxObjInHands = 2;
 
 my $cur;
 
@@ -553,6 +554,7 @@ sub z_drop {
 }
 
 sub z_get {
+    return msg('nocapacity') if @{$$cur{'user'}{'o'}} >= $maxObjInHands;
     my ($msg, $what, $obj, $proto) = objFromRoom($_[0]);
     return $msg unless defined($obj);
     roomstate($$cur{'rid'}, $$cur{'roomst'});
