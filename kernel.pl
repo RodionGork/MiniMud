@@ -23,7 +23,7 @@ sub action {
     my $matches = $$cur{'matches'};
     for my $i (keys @_) {
         my $v = $_[$i];
-        $_[$i] = $$matches[substr($v, 1)-1] if (substr($v, 0, 1) eq '$')
+        $_[$i] = $$matches[substr($v, 1)-1] if ($v =~ /^\$\d/);
     }
     return &$fn(@_);
 }
@@ -43,7 +43,12 @@ sub cmdMatchAndAct {
     my @acts = split /\s*;\s*/, $act;
     for my $a (@acts) {
         if (substr($a, 0, 1) eq '@') {
-            my @aa = action(split(/ /, substr($a, 1)));
+            my @params = ();
+            my ($act, $params) = split / /, substr($a, 1), 2;
+            if (defined $params) {
+                @params = substr($params, 0, 1) ne '!' ? split(/ /, $params) : (substr $params, 1);
+            }
+            my @aa = action($act, @params);
             push @res, $aa[0];
             last if @aa > 1 && $aa[1];
         } else {
@@ -201,7 +206,7 @@ sub meta { return kvop('x', @_); }
 
 sub msg {
     my $key = shift @_;
-    my $msg = msgs($key);
+    my $msg = $key ? msgs($key) : shift @_;
     return "msg: #$key" . (@_ ? ' [' . join(',', @_) . ']' : '') if (!$msg);
     my @msg = split /\|/, $msg;
     $msg = $msg[int(rand(@msg))];
@@ -614,10 +619,14 @@ sub z_say {
 }
 
 sub z_social {
+    if (@_ == 1) {
+        return msg('', $_[0])
+    }
     my ($whom, $action) = @_;
-    my ($whomid, $nameCase) = hereUser($whom, 3);
+    my $case = $_[2] // 3;
+    my ($whomid, $nameCase) = hereUser($whom, $case);
     return msg('nouserhere', $whom) unless $whomid;
-    return msg('social', $action, $whomid, $whom);
+    return msg('social' . $case, $action, $whomid, $whom);
 }
 
 sub z_teleport {
