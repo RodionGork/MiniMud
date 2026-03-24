@@ -2,8 +2,9 @@ use v5.16;
 use warnings;
 use File::Basename;
 use lib dirname(__FILE__);
-use JSON::PP;
-require ($ENV{'MUD_KV'} // 'dbsql.pl');
+require 'dbsql.pl';
+require 'utils.pl';
+require 'wizard.pl';
 
 my $lang = $ENV{'MUD_LANG'} // '';
 if ($lang) {
@@ -12,7 +13,6 @@ if ($lang) {
     $lang = 'en';
 }
 
-our $autoCreateUser = 0;
 our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
 our $pathMem = 20;
 our $goSleepTime = 90;
@@ -61,8 +61,6 @@ sub cmdMatchAndAct {
     }
     return join "\n", @res;
 }
-
-sub handle { return kvop('h', @_); }
 
 sub hasObj {
     my ($where, $what, $state) = @_;
@@ -118,53 +116,6 @@ sub initUser {
     return $user;
 }
 
-sub inspect {
-    my $cmd = $_[0];
-    my $j = JSON::PP->new->allow_nonref;
-    if (substr($cmd, 0, 2) eq '//') {
-        $j = $j->pretty;
-        $cmd = substr $cmd, 1;
-    }
-    my @cmd = split '=', substr $cmd, 1;
-    my $replace;
-    if (@cmd > 1) {
-        $replace = $cmd[1];
-        $replace = [] if ($replace eq '[]');
-        $replace = {} if ($replace eq '{}');
-    }
-    my @path = split '/', $cmd[0];
-    my $key = shift @path;
-    my $par;
-    my $obj = kvget($key);
-    return "No such record in storage: $key" unless ($obj || @path == 0 && defined($replace));
-    my $elem = $obj;
-    my $subkey = $key;
-    my $parIsHash = 1;
-    while (@path) {
-        $subkey = shift @path;
-        $par = $elem;
-        $parIsHash = ref($elem) eq 'HASH';
-        $elem = $parIsHash ? $$elem{$subkey} : $$elem[$subkey];
-        return "No subkey: $subkey" unless (defined($elem) || @path == 0 && defined($replace));
-    }
-    return $j->encode($elem//"No leaf for key $subkey") unless (defined $replace);
-    if ($replace ne '-') {
-        if ($parIsHash) {
-            $$par{$subkey} = $replace;
-        } else {
-            $$par[$subkey] = $replace;
-        }
-    } else {
-        if ($parIsHash) {
-            delete $$par{$subkey};
-        } else {
-            splice @$par, $subkey, 1;
-        }
-    }
-    kvset($key, $obj);
-    return "saved '$key': $replace";
-}
-
 sub instObj {
     my ($oid, $proto) = @_;
     my $start = $$proto{'f'}{'s'} // '';
@@ -184,12 +135,6 @@ sub isAwake {
     return $$cur{'ts'} - $_[0] <= $goSleepTime;
 }
 
-sub kvop {
-    my $suffix = shift @_;
-    my $key = (shift @_) . '-' . $suffix;
-    return @_ ? kvset($key, $_[0]) : kvget($key);
-}
-
 sub markSeen {
     my $rid = $_[0];
     my $seen = $$cur{'user'}{'seen'};
@@ -205,8 +150,6 @@ sub markSeen {
     pop @$seen while (@$seen > $pathMem);
     user($$cur{'uid'}, $$cur{'user'});
 }
-
-sub meta { return kvop('x', @_); }
 
 sub msg {
     my $key = shift @_;
@@ -238,8 +181,6 @@ sub msg {
     }
     return $msg;
 }
-
-sub msgs { return kvop('m', @_); }
 
 sub newUserComes {
     my ($uid, $cmd) = @_;
@@ -274,13 +215,6 @@ sub notify {
         user($id, $other);
     }
 }
-
-sub numOrStr {
-    my $v = $_[0];
-    return ($v =~ /^\d.*/) ? ($v+0) : ($v."");
-}
-
-sub obj { return kvop('o', @_); }
 
 sub objFromRoom {
     my $what = $_[0];
@@ -342,9 +276,6 @@ sub reportEvents {
     return $res;
 }
 
-sub room { return kvop('r', @_); }
-sub roomstate { return kvop('rs', @_); }
-
 sub runCmd {
     my ($uid, $cmd) = @_;
     my ($verb, $tail) = splitAndFill(' ', $cmd, 2);
@@ -381,20 +312,6 @@ sub runCmd {
     return $events . msg('nocmd');
 }
 
-sub splitAndFill {
-    my ($sep, $str, $cnt) = @_;
-    my @res = split($sep, $str, $cnt);
-    while (@res < $cnt) {
-        push @res, "";
-    }
-    return @res;
-}
-
-sub trim {
-    $_[0] =~ s/^\s+|\s$//g;
-    return $_[0];
-}
-
 sub updateUserTimestamp {
     my $roomst = $$cur{'roomst'};
     my $uid = $$cur{'uid'};
@@ -402,104 +319,6 @@ sub updateUserTimestamp {
         $$roomst{'u'}{$uid}[1] = $$cur{'ts'};
         roomstate($$cur{'rid'}, $roomst)
     }
-}
-
-sub user { return kvop('u', @_); }
-sub userdata { return kvop('ud', @_); }
-
-sub wizCmd {
-    my ($cmd, $tail) = splitAndFill(' ', $_[0], 2);
-    my $fn = eval('\&w_' . $cmd);
-    return &{$fn}($tail) if (defined &{$fn});
-    return 'Unknown wiz command';
-}
-
-sub w_addcmd {
-    my ($rid, $pattern, $action) = splitAndFill(' ', $_[0], 3);
-    if ($rid eq '*') {
-        my $cmds = meta('cmds');
-        push @$cmds, [$pattern, $action];
-        meta('cmds', $cmds);
-        return 'command added globally';
-    }
-    my $room = room($rid);
-    return 'No such room' unless ($room);
-    push @{$$room{'c'}}, [$pattern, $action];
-    room($rid, $room);
-    return "command added to room #$rid";
-}
-
-sub w_addobj {
-    my ($tag, $descr) = splitAndFill(' ', $_[0], 2);
-    my ($oid, $synonyms) = splitAndFill(':', $tag, 2);
-    my $proto = initObj $descr, $synonyms;
-    obj($oid, $proto);
-    my $where = instObj($oid, $proto);
-    if ($where) {
-        $where = " and put to room #$where";
-    }
-    return "obj #$oid added$where";
-}
-
-sub w_addmsg {
-    my ($key, $phrase) = splitAndFill(' ', $_[0], 2);
-    msgs($key, $phrase);
-    return "message added for #$key";
-}
-
-sub w_addroom {
-    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
-    room($rid, initRoom($descr));
-    my $roomst = roomstate($rid);
-    roomstate($rid, {}) if (!$roomst);
-    return "room $rid added";
-}
-
-sub w_addway {
-    my ($rid1, $dir) = splitAndFill(' ', $_[0], 2);
-    my $room = room($rid1);
-    return 'No source room' if (!$room);
-    push @{$$room{'w'}}, $dir;
-    room($rid1, $room);
-    return "path from $rid1 added";
-}
-
-sub w_import {
-    my $fname = $_[0];
-    kvload($fname);
-    my $imports = meta('import');
-    unless (grep($_ eq $fname, @$imports)) {
-        push @$imports, $fname;
-        meta('import', $imports);
-    }
-    return "data file $fname loaded and added to imports";
-}
-
-sub w_load {
-    my $fname = $_[0] || 'gamedata.json';
-    kvload($fname);
-    my $imports = meta('import');
-    my $res = '';
-    if ($imports) {
-        for my $subfile (@$imports) {
-            kvload($subfile);
-            $res .= "subfile $subfile loaded\n";
-        }
-    }
-    return $res . "data file $fname loaded";
-}
-
-sub w_putobj {
-    my ($rid, $oid, $st) = splitAndFill(' ', $_[0], 3);
-    $st = $st ? int($st) : 0;
-    my $err = putObjInt($rid, $oid, $st);
-    return $err ? $err : "obj #$oid added to room #$rid";
-}
-
-sub w_save {
-    my $fname = $_[0] || 'gamedata.json';
-    kvsave($fname);
-    return "data file $fname saved";
 }
 
 sub you {
