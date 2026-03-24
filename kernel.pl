@@ -373,7 +373,7 @@ sub z_drop {
 }
 
 sub z_get {
-    return msg('nocapacity') if @{$$cur{'user'}{'o'}} >= $maxObjInHands;
+    return msg('nocapacity', you(2)) if @{$$cur{'user'}{'o'}} >= $maxObjInHands;
     my ($msg, $what, $obj, $proto) = objFromRoom($_[0]);
     return $msg unless defined($obj);
     roomstate($$cur{'rid'}, $$cur{'roomst'});
@@ -386,6 +386,8 @@ sub z_give {
     my $whom = $_[1];
     my ($whomid, $nameCase) = hereUser($whom, 2);
     return msg('nouserhere', $whom) unless $whomid;
+    my $recipient = user($whomid);
+    return msg('nocapacity', $whom) if @{$$recipient{'o'}} >= $maxObjInHands;
     my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
     return $msg unless defined($obj);
     user($$cur{'uid'}, $$cur{'user'});
@@ -393,7 +395,6 @@ sub z_give {
         my $room = instObj($what, $proto);
         return msg('lost', $what) . "\n" . msg($room ? 'disapp' : 'disint', $what);
     }
-    my $recipient = user($whomid);
     push @{$$recipient{'o'}}, $obj;
     user($whomid, $recipient);
     my $res = msg('give', $what, $whomid, $whom);
@@ -413,6 +414,13 @@ sub z_grant {
 sub z_haveObj {
     my ($obj, $state) = split /=/, $_[0], 2;
     return hasObj($$cur{'user'}, $obj, $state) >= 0;
+}
+
+sub z_inv {
+    my $user = $$cur{'user'};
+    my @objdescr = map $$_[2], @{$$user{'o'} || []};
+    return msg('inv-none') unless @objdescr;
+    return msg('inv', join(', ', @objdescr));
 }
 
 sub z_look {
