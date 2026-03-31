@@ -15,8 +15,8 @@ if ($lang) {
 
 our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
 our $pathMem = 20;
-our $goSleepTime = 90;
-our $goExpiredTime = 180;
+our $goSleepTime = 30;
+our $goExpiredTime = 60;
 our $maxObjInHands = 2;
 
 my $cur;
@@ -60,6 +60,21 @@ sub cmdMatchAndAct {
         }
     }
     return join "\n", @res;
+}
+
+sub expireChar {
+    my ($charid, $rid, $roomst) = @_;
+    my $char = user($charid);
+    my $objrec = pop @{$$char{'o'}};
+    return unless defined $objrec;
+    user($charid, $char);
+    my $proto = obj($$objrec[0]);
+    if (exists $$proto{'f'}{'nodrop'}) {
+        instObj($$objrec[0], $proto);
+    } else {
+        push @{$$roomst{'o'}}, $objrec;
+        roomstate($rid, $roomst);
+    }
 }
 
 sub hasObj {
@@ -133,6 +148,10 @@ sub instObj {
 
 sub isAwake {
     return $$cur{'ts'} - $_[0] <= $goSleepTime;
+}
+
+sub isExpiring {
+    return $$cur{'ts'} - $_[0] > $goExpiredTime;
 }
 
 sub markSeen {
@@ -444,7 +463,11 @@ sub z_look {
     for my $u (keys %{$$roomst{'u'}}) {
         next if ($u == $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
-        $res .= "\n" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
+        unless (isExpiring($urec[1])) {
+            $res .= "\n" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
+        } else {
+            expireChar($u, $rid, $roomst);
+        }
     }
     markSeen($rid);
     return $res;
