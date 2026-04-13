@@ -3,21 +3,29 @@ use warnings;
 use DBI;
 use JSON::PP;
 
-my $json = JSON::PP->new->allow_nonref;
-my $connstr = 'dbi:SQLite:uri=file:gamedata.db';
-
-sub dbconn {
-    return DBI->connect($connstr . '?mode=' . $_[0], '', '', {PrintError=>0, AutoCommit=>0, sqlite_unicode=>1});
+sub sqlite_conn {
+    my $connstr = 'dbi:SQLite:uri=file:gamedata.db';
+    return DBI->connect($connstr . '?mode=' . $_[0], '', '',
+        {PrintError=>0, AutoCommit=>0, sqlite_unicode=>1});
 }
 
-sub dbinit {
-    my $res = dbconn('rwc') or die('DB opening failed');
+sub sqlite_init {
+    my $res = sqlite_conn('rwc') or die('DB opening failed');
     $res->do('create table kv (k text primary key, v text)');
     say 'Initializing database...';
     return $res;
 }
 
-my $db = (dbconn('rw') or dbinit());
+my $db;
+my $dbuser = $ENV{'DB_USER'} // '';
+if ($dbuser) {
+    $db = DBI->connect('dbi:mysql:' . $ENV{'DB_NAME'},
+        $dbuser, $ENV{'DB_PWD'}, {AutoCommit=>0});
+} else {
+    $db = (sqlite_conn('rw') or sqlite_init());
+}
+
+my $json = JSON::PP->new->allow_nonref;
 
 sub dbcommit {
     $db->commit();
