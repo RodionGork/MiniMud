@@ -46,9 +46,11 @@ function addDiv(cls, text) {
 }
 
 var commError = false;
+var chkevtToBase = 4000;
+var chkevtToVar = 3000;
 
 function sendCmd(cmd) {
-    nextEventCheck = new Date().getTime() + 4000 + Math.round(Math.random() * 3000);
+    nextEventCheck = new Date().getTime() + chkevtToBase + Math.round(Math.random() * chkevtToVar);
     var m = location.href.match(/\?token\=([0-9a-zA-Z_\-]+)/);
     if (m === null) {
         respond('You need a magical token to communnicate to server!');

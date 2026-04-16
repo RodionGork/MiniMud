@@ -1,0 +1,4 @@
+Order Allow,Deny
+<FilesMatch "^gamedemo.cgi|err.log$">
+Allow from all
+</FilesMatch>

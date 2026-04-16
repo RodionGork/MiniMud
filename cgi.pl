@@ -1,5 +1,6 @@
 use v5.16;
 use warnings;
+use open ':std', ':encoding(UTF-8)';
 use File::Basename;
 use lib dirname(__FILE__);
 require 'kernel.pl';

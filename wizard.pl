@@ -83,6 +83,11 @@ sub w_load {
     return $res . "data file $fname loaded";
 }
 
+sub w_nukedb {
+    kvnuke();
+    return 'database nuked';
+}
+
 sub w_putobj {
     my ($rid, $oid, $st) = splitAndFill(' ', $_[0], 3);
     $st = $st ? int($st) : 0;

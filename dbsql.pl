@@ -20,7 +20,7 @@ my $db;
 my $dbuser = $ENV{'DB_USER'} // '';
 if ($dbuser) {
     $db = DBI->connect('dbi:mysql:' . $ENV{'DB_NAME'},
-        $dbuser, $ENV{'DB_PWD'}, {AutoCommit=>0});
+        $dbuser, $ENV{'DB_PWD'}, {AutoCommit=>0, mysql_enable_utf8 => 1});
 } else {
     $db = (sqlite_conn('rw') or sqlite_init());
 }
@@ -67,6 +67,10 @@ sub kvload {
     local $/;
     my $res = $json->decode(<$f>);
     kvset($_, $$res{$_}) for (keys %$res);
+}
+
+sub kvnuke {
+    $db->do('delete from kv');
 }
 
 1;
