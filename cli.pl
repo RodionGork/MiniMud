@@ -6,7 +6,7 @@ use lib dirname(__FILE__);
 use Term::ANSIColor ('color');
 require 'kernel.pl';
 
-my %clrs = ('H'=>'bold', 'O'=>'bright_cyan', 'E'=>'bright_yellow');
+my %clrs = ('H'=>'bold', 'O'=>'bright_cyan', 'E'=>'bright_yellow', 'U'=>'bright_red');
 
 sub clr {
     my $mode = $_[0];

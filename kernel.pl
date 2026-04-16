@@ -466,7 +466,7 @@ sub z_look {
         next if ($u eq $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
         unless (isExpiring($urec[1])) {
-            $res .= "\n" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
+            $res .= "\n#:U" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]) . ':#';
         } else {
             expireChar($u, $rid, $roomst);
         }
