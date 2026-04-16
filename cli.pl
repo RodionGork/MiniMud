@@ -6,7 +6,7 @@ use lib dirname(__FILE__);
 require 'kernel.pl';
 
 if (@ARGV < 1) {
-    print "Please specify Uid as a first argument!\n";
+    print "Please specify Uid as the first argument!\n";
     exit(1);
 }
 
@@ -31,6 +31,7 @@ while (1) {
     my $ur = '';
     while (1) {
         my $line = <STDIN>;
+        $line = 'quit' unless defined $line;
         $ur .= trim($line);
         last if (substr($ur, -1) ne '\\');
         $ur = substr($ur, 0, -1) . ' ';
