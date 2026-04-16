@@ -290,7 +290,7 @@ sub randomHandle {
 sub reportEvents {
     my ($uid, $user) = @_;
     return '' unless $user;
-    my $res = join "\n", @{$$user{'ev'}};
+    my $res = join "\n", (map '#:E'.$_.':#', @{$$user{'ev'}});
     $$user{'ev'} = [];
     user($uid, $user);
     return $res;
@@ -458,8 +458,9 @@ sub z_look {
     }
     my $descr = $$room{'d'} || "no room #$rid";
     my ($res, $long) = splitAndFill(qr/\|/, $descr, 2);
+    $res = "#:H$res:#";
     $res .= "\n$long" if ($long && !($short && grep($_ eq $rid, @{$$cur{'user'}{'seen'}})));
-    my @objdescr = map $$_[2], @{$$roomst{'o'} || []};
+    my @objdescr = map '#:O' . $$_[2] . ':#', @{$$roomst{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
     for my $u (keys %{$$roomst{'u'}}) {
         next if ($u eq $$cur{'uid'});
