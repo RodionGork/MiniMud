@@ -289,6 +289,7 @@ sub randomHandle {
 
 sub reportEvents {
     my ($uid, $user) = @_;
+    return '' unless $user;
     my $res = join "\n", @{$$user{'ev'}};
     $$user{'ev'} = [];
     user($uid, $user);
@@ -299,9 +300,9 @@ sub runCmd {
     my ($uid, $cmd) = @_;
     my ($verb, $tail) = splitAndFill(' ', $cmd, 2);
     my $us = user($uid);
-    return newUserComes($uid, $cmd) unless ($us);
     my $events = reportEvents($uid, $us);
     return $events if $cmd eq 'chkevt';
+    return newUserComes($uid, $cmd) unless ($us);
     $events .= "\n" if $events ne '';
     my $ud = userdata($uid);
     my $rid = $$us{'rm'};
@@ -461,7 +462,7 @@ sub z_look {
     my @objdescr = map $$_[2], @{$$roomst{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
     for my $u (keys %{$$roomst{'u'}}) {
-        next if ($u == $$cur{'uid'});
+        next if ($u eq $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
         unless (isExpiring($urec[1])) {
             $res .= "\n" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]);
