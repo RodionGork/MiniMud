@@ -9,6 +9,7 @@
     "heresleep-m": "$1 sleeps here|$1 is resting here",
     "get-m": "$1 taken",
     "give-m": "$1 given to $2",
+    "granted-m": "You got $1",
     "drop-m": "$1 dropped",
     "lost-m": "$1 inadvertently fell from your hands",
     "disint-m": "$1 have fallen to pieces just as it touched the ground",

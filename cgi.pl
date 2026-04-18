@@ -13,7 +13,7 @@ my ($uid, $srv, $ts) = parseToken($tkn);
 my $cmd = <>;
 chomp $cmd;
 
-print "Content-Type: text/plain\r\n\r\n";
+print "Content-Type: text/plain; charset=utf-8\r\n\r\n";
 
 if ($uid ne '') {
     print runCmd($uid, $cmd);

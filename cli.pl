@@ -6,7 +6,10 @@ use lib dirname(__FILE__);
 use Term::ANSIColor ('color');
 require 'kernel.pl';
 
-my %clrs = ('H'=>'bold', 'O'=>'bright_cyan', 'E'=>'bright_yellow', 'U'=>'bright_red');
+my %clrs = ('H'=>'bold', 'O'=>'bright_cyan', 'E'=>'bright_yellow',
+    'U'=>'bright_red', 'g'=>'green', 'r'=>'red', 'c'=>'cyan', 'y'=>'yellow',
+    'm'=>'magenta', 'b'=>'blue', 'p'=>'bright_red', 'v'=>'bright_blue',
+    'x'=>'bright_yellow', 'w'=>'bold');
 
 sub clr {
     my $mode = $_[0];
@@ -16,8 +19,8 @@ sub clr {
 
 sub parseColors {
     my $s = $_[0];
-    $s =~ s/#:(.)/clr($1)/ge;
-    $s =~ s/:#/clr('-')/ge;
+    $s =~ s/%:(.)/clr($1)/ge;
+    $s =~ s/:%/clr('-')/ge;
     return $s;
 }
 

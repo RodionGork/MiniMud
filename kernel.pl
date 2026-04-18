@@ -174,8 +174,7 @@ sub msg {
     my $key = shift @_;
     my $msg = $key ? msgs($key) : shift @_;
     return "msg: #$key" . (@_ ? ' [' . join(',', @_) . ']' : '') if (!$msg);
-    my @msg = split /\|/, $msg;
-    $msg = $msg[int(rand(@msg))];
+    $msg = msgrand($msg);
     $msg =~ s/\$(\d)/$_[$1-1]/ge;
     if (index($msg, '$u') >= 0) {
         my $person = $$cur{'userd'}{'h'};
@@ -199,6 +198,11 @@ sub msg {
         notify($msg1, $whomid, $msg2);
     }
     return $msg;
+}
+
+sub msgrand {
+    my @msg = split /\|/, $_[0];
+    return $msg[int(rand(@msg))];
 }
 
 sub newUserComes {
@@ -266,6 +270,11 @@ sub objNameMatch {
     return 0;
 }
 
+sub paint {
+    my ($s, $c) = @_;
+    return $s =~ /%:/ ? $s : '%:' . $c . $s . ':%';
+}
+
 sub putObjInt {
     my ($rid, $oid, $st) = @_;
     my $roomst = roomstate($rid);
@@ -290,7 +299,7 @@ sub randomHandle {
 sub reportEvents {
     my ($uid, $user) = @_;
     return '' unless $user;
-    my $res = join "\n", (map '#:E'.$_.':#', @{$$user{'ev'}});
+    my $res = join "\n", (map paint($_, 'E'), @{$$user{'ev'}});
     $$user{'ev'} = [];
     user($uid, $user);
     return $res;
@@ -383,7 +392,7 @@ sub z_drop {
     return $msg unless defined($obj);
     user($$cur{'uid'}, $$cur{'user'});
     if (exists $$proto{'f'}{'nodrop'}) {
-        my $room = instObj($what, $proto);
+        my $room = instObj($$obj[0], $proto);
         return msg($room ? 'disapp' : 'disint', $what);
     } else {
         push @{$$cur{'roomst'}{'o'}}, $obj;
@@ -424,11 +433,12 @@ sub z_give {
 
 sub z_grant {
     my $oid = $_[0];
+    my $st = 0;
     my $obj = obj($oid);
     return 'No such object' unless ($obj);
-    push @{$$cur{'user'}{'o'}}, [$oid, 0];
+    push @{$$cur{'user'}{'o'}}, [$oid, $st, $$obj{'d'}[$st], $$obj{'s'}];
     user ($$cur{'uid'}, $$cur{'user'});
-    return 'You got ' . $oid;
+    return msg('granted', $$obj{'d'}[$st]);
 }
 
 sub z_haveObj {
@@ -458,15 +468,15 @@ sub z_look {
     }
     my $descr = $$room{'d'} || "no room #$rid";
     my ($res, $long) = splitAndFill(qr/\|/, $descr, 2);
-    $res = "#:H$res:#";
+    $res = paint($res, 'H');
     $res .= "\n$long" if ($long && !($short && grep($_ eq $rid, @{$$cur{'user'}{'seen'}})));
-    my @objdescr = map '#:O' . $$_[2] . ':#', @{$$roomst{'o'} || []};
+    my @objdescr = map paint($$_[2], 'O'), @{$$roomst{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
     for my $u (keys %{$$roomst{'u'}}) {
         next if ($u eq $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
         unless (isExpiring($urec[1])) {
-            $res .= "\n#:U" . msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]) . ':#';
+            $res .= "\n" . paint(msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]), 'U');
         } else {
             expireChar($u, $rid, $roomst);
         }
@@ -526,7 +536,7 @@ sub z_walk {
         next if ($obj && hasObj($$cur{'user'}, $obj, $st) < 0 && hasObj($$cur{'room'}, $obj, $st) < 0);
         my ($tgt, $msg) = splitAndFill(qr/\|/, $t0, 2);
         $msg = z_teleport($tgt) . ($msg?"\n$msg":'') if ($tgt);
-        return $msg;
+        return msgrand($msg);
     }
     return msg('noway');
 }
