@@ -52,8 +52,13 @@ sub cmdMatchAndAct {
             if (defined $params) {
                 @params = substr($params, 0, 1) ne '!' ? split(/ /, $params) : (substr $params, 1);
             }
+            my $hush = 0;
+            if (substr($act, 0, 1) eq '~') {
+                $hush = 1;
+                $act = substr($act, 1);
+            }
             my @aa = action($act, @params);
-            push @res, $aa[0];
+            push @res, $aa[0] unless $hush;
             last if @aa > 1 && $aa[1];
         } else {
             push @res, $a;
@@ -412,13 +417,13 @@ sub z_get {
 }
 
 sub z_give {
+    my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
+    return $msg unless defined($obj);
     my $whom = $_[1];
     my ($whomid, $nameCase) = hereUser($whom, 2);
     return msg('nouserhere', $whom) unless $whomid;
     my $recipient = user($whomid);
     return msg('nocapacity', $whom) if @{$$recipient{'o'}} >= $maxObjInHands;
-    my ($msg, $what, $obj, $proto) = objFromUser($_[0]);
-    return $msg unless defined($obj);
     user($$cur{'uid'}, $$cur{'user'});
     if (exists $$proto{'f'}{'nogive'}) {
         my $room = instObj($what, $proto);

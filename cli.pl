@@ -51,7 +51,9 @@ while (1) {
     while (1) {
         my $line = <STDIN>;
         $line = 'quit' unless defined $line;
-        $ur .= trim($line);
+        $line = trim($line);
+        next if !$line || substr($line, 0, 1) eq ';';
+        $ur .= $line;
         last if (substr($ur, -1) ne '\\');
         $ur = substr($ur, 0, -1) . ' ';
     }

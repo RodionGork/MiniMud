@@ -1,9 +1,9 @@
+- commands on objects
+- logging user actions
 - intro from db
 - default name prefixes from db
-- stay awake on other commands besides travel
 - objects expiration
 - wizard impersonation
-- synonyms for objects
 - user registering and banning
 - split storage into several files so they could be updated separately (at least users?)
 - mobiles wandering, attacking users, perhaps talking
@@ -31,4 +31,6 @@
 * talking between users and in groups (as part of user events)
 * user events list
 * object exchanging
-
+* stay awake on other commands besides travel
+* text colorization
+* synonyms for objects
