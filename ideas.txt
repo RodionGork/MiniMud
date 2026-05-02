@@ -1,4 +1,5 @@
 - commands on objects
+- descriptions for users and objects (with dedicated command)
 - logging user actions
 - intro from db
 - default name prefixes from db

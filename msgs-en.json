@@ -24,5 +24,6 @@
     "nocmd-m": "Sorry, I don't understand that|Unknown command",
     "social-m": "You $1 $2",
     "funny-m": "(so funny)",
+    "ways-m": "You see ways to: $1",
     "you-m": "You"
 }

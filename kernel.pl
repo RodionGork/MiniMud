@@ -61,7 +61,7 @@ sub cmdMatchAndAct {
             push @res, $aa[0] unless $hush;
             last if @aa > 1 && $aa[1];
         } else {
-            push @res, $a;
+            push @res, msgrand($a);
         }
     }
     return join "\n", @res;
@@ -536,6 +536,7 @@ sub z_walk {
     my $dir = lc(shift @_);
     for my $way (@{$$cur{'room'}{'w'}}) {
         my ($d0, $t0) = split / /, $way, 2;
+        $d0 =~ s/^\.//;
         my ($d, $obj, $st) = splitAndFill(qr/\|/, $d0, 3);
         next unless ($d eq $dir);
         next if ($obj && hasObj($$cur{'user'}, $obj, $st) < 0 && hasObj($$cur{'room'}, $obj, $st) < 0);
@@ -544,6 +545,17 @@ sub z_walk {
         return msgrand($msg);
     }
     return msg('noway');
+}
+
+sub z_ways {
+    my %res;
+    for my $way (@{$$cur{'room'}{'w'}}) {
+        my ($d0, $t0) = split / /, $way, 2;
+        next if $d0 =~ /^\./;
+        $d0 =~ s/\|.*//;
+        $res{$d0} = 1
+    }
+    return msg('ways', join(', ', keys %res));
 }
 
 1;
