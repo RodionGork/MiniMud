@@ -84,11 +84,12 @@ sub expireChar {
 
 sub hasObj {
     my ($where, $what, $state) = @_;
+    $state = '' unless defined($state);
     my $objs = $$where{'o'};
     return -1 unless $objs;
     for my $i (keys @$objs) {
         my $obj = $$objs[$i];
-        return $i if (objNameMatch($what, 1, $$obj[0], $$obj[3]) && (!defined($state) || $state eq $$obj[1]));
+        return $i if (objNameMatch($what, 1, $$obj[0], $$obj[3]) && ($state eq '' || $state eq $$obj[1]));
     }
     return -1;
 }

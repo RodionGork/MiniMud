@@ -49,6 +49,7 @@ Now we can add ways between the rooms. Path is something respected by `walk` int
     !addway room dir where
     !addway room dir|obj where
     !addway room dir|obj|state where
+    !addway room dir|obj|state where|message
     !addway room dir |message
 
 In the simplest form you specify two room ids (`room` and `where`) while `dir` is some direction
@@ -58,14 +59,17 @@ south-east and in the `addcmd ... @walk` above we haven't mentioned such abbrevi
 message corresponding to "no way" is printed.
 
 If `dir` is suffixed by some object-id, then this way only will work if the user has such object
-or such object is present in given room (in state `0` in both cases - e.g. we can pass if door is
-in the state "open" or if user has passcard and it is not in "broken" state). It could be further
-suffixed by the specific state (if we don't like state `0`).
+or such object is present in given room. It could be further suffixed by the specific state
+(in state `0` in both cases - e.g. we can pass if door is in the state "open" or if user has
+passcard and it is not "broken").
 
-Further we can specify message (prefixed with pipe) instead of target room. It allows to chain
-several commands for the same direction, like this:
+Further we can suffix target room (`where`) with message - it will be printed on traversing this way.
+If the message (with preceding pipe) is given, but target room is empty, then no move happens but
+the message is printed (generally, explaining why user can't go that way).
 
-    !addway gates n|passcard mainhall
+It allows to chain several commands for the same direction, like this:
+
+    !addway gates n|passcard mainhall|You used passcard to enter Main Hall
     !addway gates n|passcard|1 |You can't enter as your passcard is broken
     !addway gates n |You need a passcard to pass here!
 
