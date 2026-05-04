@@ -250,7 +250,8 @@ sub objFromRoom {
     my $roomst = $$cur{'roomst'};
     my $idx = hasObj($roomst, $what);
     return msg('noobj') if ($idx < 0);
-    my $proto = obj($what);
+    my $oid = $$roomst{'o'}[$idx][0];
+    my $proto = obj($oid);
     return msg('noget') if (exists $$proto{'f'}{'noget'});
     my $obj = splice @{$$roomst{'o'}}, $idx, 1;
     return '', $what, $obj, $proto;
