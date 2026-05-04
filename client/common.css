@@ -1,0 +1,22 @@
+body {font-family: sans-serif; background-color: #000; color: #aaa }
+input { width: 100%; background-color: #444; color: #3f3; font-family: monospace; font-weight: bold; border-radius: 5px; padding: 5px; }
+.useract { color: #7fa; font-weight: bold; padding-bottom: 0.4em }
+.machine { padding-bottom: 0.7em }
+@media screen and (orientation: landscape) {
+  div{ width: 800px; margin: 3px auto; }
+}
+.x-H { font-weight: bold; color: white }
+.x-O { color: #3ff }
+.x-E { color: yellow }
+.x-U { color: #f77 }
+.x-g { color: #0c0 }
+.x-r { color: red }
+.x-c { color: cyan }
+.x-m { color: magenta }
+.x-p { color: #f55; font-weight: bold }
+.x-y { color: yellow }
+.x-x { color: yellow; font-weight: bold }
+.x-b { color: blue }
+.x-v { color: #33f; font-weight: bold }
+.x-w { color: #fff; font-weight: bold }
+
