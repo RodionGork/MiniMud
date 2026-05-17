@@ -25,6 +25,7 @@ function sendCmd(cmd) {
     nextEventCheck = new Date().getTime() + chkevtToBase + Math.round(Math.random() * chkevtToVar);
     var m = location.href.match(/\?token\=([0-9a-zA-Z_\-]+)/);
     if (m === null) {
+        clearInterval(eventTimer);
         respond('You need a magical token to communnicate to server!');
         return;
     }
@@ -38,8 +39,14 @@ function sendCmd(cmd) {
                 respond('Sorry, exchange error: ' + resp.status);
             commError = true;
         } else {
-            commError = false;
-            resp.text().then((data) => respond(data));
+            resp.text().then((data) => {
+                if (data.substr(0, 5) == '!err ') {
+                    if (!commError)
+                        respond(data.substr(5));
+                    commError = true;
+                } else
+                    respond(data)
+            });
         }
     }).catch((err) => {
         if (!commError)
@@ -67,5 +74,5 @@ function eventsCheck() {
     sendCmd('chkevt');
 }
 
-setInterval(eventsCheck, 1000 + Math.floor(Math.random()*100));
+var eventTimer = setInterval(eventsCheck, 1000 + Math.floor(Math.random()*100));
 

@@ -2,6 +2,7 @@ body {font-family: sans-serif; background-color: #000; color: #aaa }
 input { width: 100%; background-color: #444; color: #3f3; font-family: monospace; font-weight: bold; border-radius: 5px; padding: 5px; }
 .useract { color: #7fa; font-weight: bold; padding-bottom: 0.4em }
 .machine { padding-bottom: 0.7em }
+.links { font-size: 70%; text-align: right; color: yellow }
 @media screen and (orientation: landscape) {
   div{ width: 800px; margin: 3px auto; }
 }

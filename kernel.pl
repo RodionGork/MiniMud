@@ -160,6 +160,15 @@ sub isExpiring {
     return $$cur{'ts'} - $_[0] > $goExpiredTime;
 }
 
+sub logCmd {
+    my $cmd = $_[0];
+    my $uid = $$cur{'uid'};
+    my $rid = $$cur{'rid'};
+    open(my $file, '>>:encoding(UTF-8)', '_game.log');
+    say $file "$uid $rid $cmd";
+    close($file);
+}
+
 sub markSeen {
     my $rid = $_[0];
     my $seen = $$cur{'user'}{'seen'};
@@ -325,6 +334,8 @@ sub runCmd {
     my $room = room($rid) // {};
     my $roomst = roomstate($rid) // {};
     $cur = {'uid'=>$uid, 'user'=>$us, 'userd'=>$ud, 'rid'=>$rid, 'room'=>$room, 'roomst'=>$roomst, 'ts'=>time()};
+    my $wizard = ($$cur{'ts'} < ($$us{'wiz'}||0));
+    logCmd($cmd) unless ($wizard && substr($cmd, 0, 1) eq '!');
     my @cmds = @{$$room{'c'} // []};
     for my $c (@cmds) {
         my $res = cmdMatchAndAct($$c[0], $cmd, $$c[1]);
@@ -340,7 +351,7 @@ sub runCmd {
         user($uid, $us);
         return '10 min';
     }
-    if ($$cur{'ts'} < ($$us{'wiz'}||0)) {
+    if ($wizard) {
         my $firstLtr = substr $cmd, 0, 1;
         return wizCmd(substr $cmd, 1) if ($firstLtr eq '!');
         return inspect($cmd) if ($firstLtr eq '/');

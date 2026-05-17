@@ -15,9 +15,11 @@ chomp $cmd;
 
 print "Content-Type: text/plain; charset=utf-8\r\n\r\n";
 
-if ($uid ne '') {
+if ($uid eq '') {
+    print '!err Something bad happened to your token, perhaps re-login :(';
+} elsif ($ts + 86400 < time()) {
+    print '!err Token expired, please re-login';
+} else {
     print runCmd($uid, $cmd);
     dbcommit();
-} else {
-    print 'Something bad happened to your token, perhaps re-login :(';
 }
