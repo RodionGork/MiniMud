@@ -2,6 +2,7 @@ use v5.16;
 use warnings;
 use File::Basename;
 use lib dirname(__FILE__);
+use POSIX;
 require 'dbsql.pl';
 require 'utils.pl';
 require 'wizard.pl';
@@ -164,8 +165,9 @@ sub logCmd {
     my $cmd = $_[0];
     my $uid = $$cur{'uid'};
     my $rid = $$cur{'rid'};
+    my $time = POSIX::strftime("%j%H%M%S", gmtime);
     open(my $file, '>>:encoding(UTF-8)', '_game.log');
-    say $file "$uid $rid $cmd";
+    say $file "$time $uid $rid $cmd";
     close($file);
 }
 
@@ -389,20 +391,21 @@ sub z_chgender {
 }
 
 sub z_chname {
-    my ($nom, $gen, $dat, $acc) = @_;
+    my $nom = shift @_;
+    my @cases = @_;
     if (handle($nom)) {
         return (msg('nameexists'), 1);
     }
     handle($$cur{'userd'}{'h'}, '!del');
     handle($nom, $$cur{'uid'});
-    $$cur{'userd'}{'n'} = "$gen $dat $acc";
+    $$cur{'userd'}{'n'} = join(' ', @cases);
     $$cur{'userd'}{'h'} = $nom;
     userdata($$cur{'uid'}, $$cur{'userd'});
     my $userinroom = $$cur{'roomst'}{'u'}{$$cur{'uid'}};
     $$userinroom[0] = $nom;
     $$userinroom[2] = $$cur{'userd'}{'n'};
     roomstate($$cur{'rid'}, $$cur{'roomst'});
-    return msg('namechanged', $nom, $gen, $dat, $acc);
+    return msg('namechanged', $nom, @cases);
 }
 
 sub z_drop {
@@ -516,8 +519,12 @@ sub z_social {
     if (@_ == 1) {
         return msg('', $_[0])
     }
-    my ($whom, $action) = @_;
-    my $case = $_[2] // 3;
+    my $whom = shift @_;
+    my $case = 3;
+    if ($_[-1] =~ /\d+/) {
+        $case = pop @_;
+    }
+    my $action = join ' ', @_;
     my ($whomid, $nameCase) = hereUser($whom, $case);
     return msg('nouserhere', $whom) unless $whomid;
     return msg('social' . $case, $action, $whomid, $whom);
