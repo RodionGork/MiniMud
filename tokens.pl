@@ -33,7 +33,7 @@ sub parseToken {
 
 if (@ARGV > 0) {
     if (length($ARGV[0]) < 64) {
-        print makeToken($ARGV[0], 'http://localhost:8001/cgi-bin/run-cmd.sh') . "\n";
+        print makeToken($ARGV[0], $ARGV[1]) . "\n";
     } else {
         my ($uid, $srv, $ts) = parseToken $ARGV[0];
         print "$uid, $ts, $srv\n";
