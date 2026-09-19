@@ -422,6 +422,24 @@ sub z_drop {
     }
 }
 
+sub z_examine {
+    my $what = $_[0];
+    my $oid = '';
+    my $roomst = $$cur{'roomst'};
+    my $idx = hasObj($roomst, $what);
+    if ($idx >= 0) {
+        $oid = $$roomst{'o'}[$idx][0];
+    } else {
+        my $user = $$cur{'user'};
+        $idx = hasObj($user, $what);
+        $oid = $$user{'o'}[$idx][0] unless $idx < 0;
+    }
+    return msg('noobj') if $oid eq '';
+    my $descr = objdescr($oid);
+    return msg('nodescr') unless $descr;
+    return $descr;
+}
+
 sub z_get {
     return msg('nocapacity', you(2)) if @{$$cur{'user'}{'o'}} >= $maxObjInHands;
     my ($msg, $what, $obj, $proto) = objFromRoom($_[0]);

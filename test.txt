@@ -7,6 +7,7 @@
 !addcmd * haha You laugh heartily: ha-ha-ha!
 !addmsg said You mumbled: $1
 !addobj ball heavy leather ball
+!addodescr ball Almost regular polyhedron made of 32 leather polygons.
 !putobj start ball
 look
 !addroom park In the park|You are wandering in a green park,\
@@ -32,6 +33,7 @@ look
 !addobj pass:passkey,passcard,keycard white passcard | broken passkey #nodrop #s:park,pond #init:1
 say Here is no hren!
 get hren
+exam ball
 get ball
 n
 say I have no baby!

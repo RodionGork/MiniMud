@@ -47,7 +47,7 @@ sub inspect {
             splice @$par, $subkey, 1;
         }
     }
-    kvset($key, $obj);
+    kvset($key, $obj//$replace);
     return "saved '$key': $replace";
 }
 
@@ -71,6 +71,10 @@ sub obj { return kvop('o', @_); }
 sub room { return kvop('r', @_); }
 
 sub roomstate { return kvop('rs', @_); }
+
+sub objdescr { return kvop('od', @_); }
+
+sub userdescr { return kvop('ud', @_); }
 
 sub splitAndFill {
     my ($sep, $str, $cnt) = @_;

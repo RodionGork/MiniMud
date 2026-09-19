@@ -35,6 +35,12 @@ sub w_addobj {
     return "obj #$oid added$where";
 }
 
+sub w_addodescr {
+    my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
+    objdescr($oid, $descr);
+    return "descr added for #$oid";
+}
+
 sub w_addmsg {
     my ($key, $phrase) = splitAndFill(' ', $_[0], 2);
     msgs($key, $phrase);

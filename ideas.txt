@@ -1,12 +1,8 @@
 - commands on objects
 - descriptions for users and objects (with dedicated command)
-- logging user actions
-- intro from db
-- default name prefixes from db
 - objects expiration
 - wizard impersonation
 - user registering and banning
-- split storage into several files so they could be updated separately (at least users?)
 - mobiles wandering, attacking users, perhaps talking
 
 * commands at places (including view)
@@ -35,3 +31,7 @@
 * stay awake on other commands besides travel
 * text colorization
 * synonyms for objects
+* logging user actions
+? default name prefixes from db (don't remember, perhaps not relevant anymore)
+? split storage into several files so they could be updated separately - not relevant as switched to db
+? intro from db - not relevant, probably, since only web-client is going to be used
