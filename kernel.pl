@@ -101,8 +101,9 @@ sub hereUser {
     my $users = $$cur{'roomst'}{'u'};
     for my $uid (keys %$users) {
         my $val = $$users{$uid};
-        my $name = $case ? ((split / /, $$val[2])[$case-1]) : $$val[0];
-        return $uid, $name if ($name eq $target)
+        my @cases = split / /, $$val[2];
+        my $name = ($case && $case < @cases) ? ($cases[$case-1]) : $$val[0];
+        return $uid, $name if ($name eq $target);
     }
     return 0, '';
 }
@@ -129,7 +130,7 @@ sub initUser {
     my $user = {'rm' => 'start', 'o' => [], 'seen' => [], 'ev' => []};
     user($uid, $user);
     my $handle = randomHandle();
-    my $userd = {'h' => $handle, 'n' => 'Unknown', 'g' => 'f'};
+    my $userd = {'h' => $handle, 'n' => 'Unknown', 'g' => 'f', 'd' => ''};
     userdata($uid, $userd);
     handle($handle, $uid);
     my $roomst = roomstate('start') // {};
@@ -383,6 +384,12 @@ sub you {
     return $you[$case];
 }
 
+sub z_chdescr {
+    $$cur{'userd'}{'d'} = $_[0];
+    userdata($$cur{'uid'}, $$cur{'userd'});
+    return msg("descrchanged");
+}
+
 sub z_chgender {
     my $gen = substr $_[0], 0, 1;
     $$cur{'userd'}{'g'} = $gen;
@@ -434,10 +441,16 @@ sub z_examine {
         $idx = hasObj($user, $what);
         $oid = $$user{'o'}[$idx][0] unless $idx < 0;
     }
+    if ($oid eq '') {
+        my ($uid, $nameCase) = hereUser($what, 3);
+        if ($uid) {
+            my $ud = userdata($uid);
+            return $$ud{'d'} || msg('nodescr');
+        }
+    }
     return msg('noobj') if $oid eq '';
     my $descr = objdescr($oid);
-    return msg('nodescr') unless $descr;
-    return $descr;
+    return $descr // msg('nodescr');
 }
 
 sub z_get {

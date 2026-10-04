@@ -39,5 +39,7 @@ n
 say I have no baby!
 drop baby
 drop ball
+!addcmd * myself\s+(\S.*) @chdescr $1
+myself Fine middle-aged person.
 !save _test.json
 quit
