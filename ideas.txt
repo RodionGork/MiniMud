@@ -1,9 +1,9 @@
 - commands on objects
-- perhaps get rid of msgs and cmds files, specifying everything in story init file
 - descriptions for places
 - objects expiration
 - wizard impersonation
 - user registering and banning
+- user restart and self-delete
 - mobiles wandering, attacking users, perhaps talking
 - timer actions (auto-closing door after it is opened etc)
 - export to wizard commands (optional)
@@ -36,6 +36,7 @@
 * synonyms for objects
 * logging user actions
 * descriptions for users and objects (with dedicated command)
+* got rid of msgs and cmds files, specifying everything in story init file
 ? default name prefixes from db (don't remember, perhaps not relevant anymore)
 ? split storage into several files so they could be updated separately - not relevant as switched to db
 ? intro from db - not relevant, probably, since only web-client is going to be used

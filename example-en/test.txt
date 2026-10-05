@@ -1,3 +1,51 @@
+!addcmd * look @look
+!addcmd * inv(?:entory)? @inv"
+!addcmd * get\s+(\S+) @get $1
+!addcmd * drop\s+(\S+) @drop $1
+!addcmd * give\s+(\S+)(?:\s+to)?\s+(\S+) @give $1 $2
+!addcmd * (?:go\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out) @walk $1
+!addcmd * say\s+(\S.*) @say $1
+!addcmd * ways @ways
+!addcmd * view @examine here
+!addcmd * (?:x|exam(?:ine)?)\s+(\S+) @examine $1
+!addcmd * ready Banzai! :)
+!addcmd * pinch\s+(\S+) @social $1 pinched
+!addcmd * kiss\s+(\S+) @social $1 kissed
+!addcmd * haha You laugh heartily: ha-ha-ha!
+
+!addmsg said $u mumbled: $1
+!addmsg asked $u asked: $1
+!addmsg excld $u exclaimed: $1
+!addmsg enters enters $u
+!addmsg exits exits $u
+!addmsg hereare Here are: $1
+!addmsg hereuser $1 stands here
+!addmsg heresleep $1 sleeps here|$1 is resting here
+!addmsg inv You have: $1
+!addmsg inv-none You don't have any stuff with you!
+!addmsg get $1 taken
+!addmsg give $1 given to $2
+!addmsg granted You got $1
+!addmsg drop $1 dropped
+!addmsg lost $1 inadvertently fell from your hands
+!addmsg disint $1 have fallen to pieces just as it touched the ground
+!addmsg disapp $1 have mystically disappeared as it touched the ground
+!addmsg noobj Here is nothing like that!
+!addmsg nodescr You see nothing special
+!addmsg noget You can't take this!
+!addmsg haveno You have nothing like that!
+!addmsg nouserhere You don't see such $1 here!
+!addmsg noway You can't pass there|There is no way
+!addmsg newuser Enter 'ready' if you want to start the game!
+!addmsg namechanged Name changed successfully to $1
+!addmsg descrchanged Description updated successfully
+!addmsg greetnew Welcome to the game, start with entering 'look' command
+!addmsg nocmd Sorry, I don't understand that|Unknown command
+!addmsg social You $1 $2
+!addmsg funny (so funny)
+!addmsg ways You see ways to: $1
+!addmsg you You
+
 !addroom start School gates|You are standing before the high iron school gates,\
     beyond them to W is a long yard along the pink school building;\
     hole in the fence leads to N
@@ -5,7 +53,6 @@
     You are in front of high metal gates with a school yard behind them\
     and pink building on the right
 !addcmd * haha You laugh heartily: ha-ha-ha!
-!addmsg said You mumbled: $1
 !addobj ball heavy leather ball
 !addodescr ball Almost regular polyhedron made of 32 leather polygons.
 !putobj start ball

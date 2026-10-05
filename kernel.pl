@@ -102,7 +102,7 @@ sub hereUser {
     for my $uid (keys %$users) {
         my $val = $$users{$uid};
         my @cases = split / /, $$val[2];
-        my $name = ($case && $case < @cases) ? ($cases[$case-1]) : $$val[0];
+        my $name = ($case && $case <= @cases) ? ($cases[$case-1]) : $$val[0];
         return $uid, $name if ($name eq $target);
     }
     return 0, '';
@@ -227,9 +227,7 @@ sub newUserComes {
     my ($uid, $cmd) = @_;
     my $cmds = meta('cmds') // [];
     if (!@{$cmds}) {
-        w_import("cmds-$lang.json");
-        w_import("msgs-$lang.json");
-        $cmds = meta('cmds');
+        $cmds = [["ready", "Banzai! :)"]];
     }
     for my $c (@$cmds) {
         my @m = ($cmd =~ /^$$c[0]$/i);
@@ -555,6 +553,7 @@ sub z_social {
     if ($_[-1] =~ /\d+/) {
         $case = pop @_;
     }
+    print "CASE: $case\n";
     my $action = join ' ', @_;
     my ($whomid, $nameCase) = hereUser($whom, $case);
     return msg('nouserhere', $whom) unless $whomid;
