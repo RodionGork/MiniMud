@@ -7,11 +7,13 @@
 !addcmd * say\s+(\S.*) @say $1
 !addcmd * ways @ways
 !addcmd * view @examine here
+!addcmd * (?:x|exam(?:ine)?)\s+(?:my)?self @examine self
 !addcmd * (?:x|exam(?:ine)?)\s+(\S+) @examine $1
 !addcmd * ready Banzai! :)
 !addcmd * pinch\s+(\S+) @social $1 pinched
 !addcmd * kiss\s+(\S+) @social $1 kissed
 !addcmd * haha You laugh heartily: ha-ha-ha!
+!addcmd * myself\s+(\S.*) @chdescr $1
 
 !addmsg said $u mumbled: $1
 !addmsg asked $u asked: $1
@@ -49,10 +51,10 @@
 !addroom start School gates|You are standing before the high iron school gates,\
     beyond them to W is a long yard along the pink school building;\
     hole in the fence leads to N
+!addrdescr start This is a starting room.
 !addcmd start look\s+around https://i.imgur.com/rtWo2N4.png\
     You are in front of high metal gates with a school yard behind them\
     and pink building on the right
-!addcmd * haha You laugh heartily: ha-ha-ha!
 !addobj ball heavy leather ball
 !addodescr ball Almost regular polyhedron made of 32 leather polygons.
 !putobj start ball
@@ -86,7 +88,7 @@ n
 say I have no baby!
 drop baby
 drop ball
-!addcmd * myself\s+(\S.*) @chdescr $1
 myself Fine middle-aged person.
+exam myself
 !save _test.json
 quit

@@ -38,7 +38,13 @@ sub w_addobj {
 sub w_addodescr {
     my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
     objdescr($oid, $descr);
-    return "descr added for #$oid";
+    return "descr added for object #$oid";
+}
+
+sub w_addrdescr {
+    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
+    roomdescr($rid, $descr);
+    return "descr added for room #$rid";
 }
 
 sub w_addmsg {

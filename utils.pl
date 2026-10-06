@@ -74,6 +74,8 @@ sub roomstate { return kvop('rs', @_); }
 
 sub objdescr { return kvop('od', @_); }
 
+sub roomdescr { return kvop('rd', @_); }
+
 sub splitAndFill {
     my ($sep, $str, $cnt) = @_;
     my @res = split($sep, $str, $cnt);

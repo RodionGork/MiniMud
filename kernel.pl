@@ -429,6 +429,10 @@ sub z_drop {
 
 sub z_examine {
     my $what = $_[0];
+    if ($what eq 'here') {
+        my $rd = roomdescr($$cur{'rid'});
+        return $rd || msg('nodescr');
+    }
     my $oid = '';
     my $roomst = $$cur{'roomst'};
     my $idx = hasObj($roomst, $what);
@@ -439,16 +443,19 @@ sub z_examine {
         $idx = hasObj($user, $what);
         $oid = $$user{'o'}[$idx][0] unless $idx < 0;
     }
-    if ($oid eq '') {
-        my ($uid, $nameCase) = hereUser($what, 3);
-        if ($uid) {
-            my $ud = userdata($uid);
-            return $$ud{'d'} || msg('nodescr');
-        }
+    if ($oid) {
+        my $descr = objdescr($oid);
+        return $descr // msg('nodescr');
     }
-    return msg('noobj') if $oid eq '';
-    my $descr = objdescr($oid);
-    return $descr // msg('nodescr');
+    my $ud;
+    if ($what eq 'self') {
+        $ud = $$cur{'userd'};
+    } else {
+        my ($uid, undef) = hereUser($what, 3);
+        return msg('noobj') if !$uid;
+        $ud = userdata($uid);
+    }
+    return $$ud{'d'} || msg('nodescr');
 }
 
 sub z_get {
@@ -553,7 +560,6 @@ sub z_social {
     if ($_[-1] =~ /\d+/) {
         $case = pop @_;
     }
-    print "CASE: $case\n";
     my $action = join ' ', @_;
     my ($whomid, $nameCase) = hereUser($whom, $case);
     return msg('nouserhere', $whom) unless $whomid;

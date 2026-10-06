@@ -1,5 +1,6 @@
 - commands on objects
 - descriptions for places
+- blind/deaf rooms (disabled interactions with other players)
 - objects expiration
 - wizard impersonation
 - user registering and banning
