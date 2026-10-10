@@ -542,6 +542,14 @@ sub z_look {
     return $res;
 }
 
+sub z_reset {
+    return msg('nouserrst') if @{$$cur{'user'}{'o'}};
+    handle($$cur{'userd'}{'h'}, '!del');
+    user($$cur{'uid'}, '!del');
+    userdata($$cur{'uid'}, '!del');
+    return msg('userreset');
+}
+
 sub z_say {
     my $phrase = $_[0];
     $phrase = trim($phrase);

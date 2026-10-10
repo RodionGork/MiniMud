@@ -14,6 +14,7 @@
 !addcmd * kiss\s+(\S+) @social $1 kissed
 !addcmd * haha You laugh heartily: ha-ha-ha!
 !addcmd * myself\s+(\S.*) @chdescr $1
+!addcmd * killself @reset
 
 !addmsg said $u mumbled: $1
 !addmsg asked $u asked: $1
@@ -42,6 +43,8 @@
 !addmsg namechanged Name changed successfully to $1
 !addmsg descrchanged Description updated successfully
 !addmsg greetnew Welcome to the game, start with entering 'look' command
+!addmsg nouserrst Get rid of your inventory first
+!addmsg userreset Hooray, character deleted! And what next?
 !addmsg nocmd Sorry, I don't understand that|Unknown command
 !addmsg social You $1 $2
 !addmsg funny (so funny)
