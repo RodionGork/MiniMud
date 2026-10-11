@@ -1,4 +1,5 @@
 - commands on objects
+- user flags and checks for them in commands
 - descriptions for places
 - blind/deaf rooms (disabled interactions with other players)
 - objects expiration

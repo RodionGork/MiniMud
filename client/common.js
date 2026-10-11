@@ -56,8 +56,14 @@ function sendCmd(cmd) {
 }
 
 function respond(text) {
-    text = text.replace(/%:(.)/g, (m, c) => `<span class="x-${c[0]}">`).replace(/:%/g, `</span>`).replace(/\n/g, '<br/>');
-    if (text.trim() !== '')
+    text = text.trim();
+    if (text.match(/^http.*(?:jpg|png|gif)$/) !== null) {
+        text = `<img src="${text}"/>`;
+    } else {
+        text = text.replace(/%:(.)/g, (m, c) => `<span class="x-${c[0]}">`)
+            .replace(/:%/g, `</span>`).replace(/\n/g, '<br/>');
+    }
+    if (text !== '')
         addDiv('machine', text);
 }
 
