@@ -10,6 +10,7 @@
 - timer actions (auto-closing door after it is opened etc)
 - export to wizard commands (optional)
 - cleanup command predicate syntax (seemingly now there are 2 variants)
+- add zones for locations (objects, commands)
 
 * commands at places (including view)
 * commands everywhere to be described in data file and added by wizard, rather than hardcoded
