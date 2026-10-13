@@ -498,6 +498,10 @@ sub z_grant {
     return msg('granted', $$obj{'d'}[$st]);
 }
 
+sub z_haveGender {
+    return $$cur{'userd'}{'g'} eq $_[0];
+}
+
 sub z_haveObj {
     my ($obj, $state) = split /=/, $_[0], 2;
     return hasObj($$cur{'user'}, $obj, $state) >= 0;
@@ -601,9 +605,15 @@ sub z_walk {
     for my $way (@{$$cur{'room'}{'w'}}) {
         my ($d0, $t0) = split / /, $way, 2;
         $d0 =~ s/^\.//;
-        my ($d, $obj, $st) = splitAndFill(qr/\|/, $d0, 3);
+        my @rule = split /\|/, $d0;
+        my $rulehead = shift @rule;
+        my ($d, $d2) = split /\?/, $rulehead;
+        my $predicate = $d2 || (@rule ? 'haveObj' : '');
         next unless ($d eq $dir);
-        next if ($obj && hasObj($$cur{'user'}, $obj, $st) < 0 && hasObj($$cur{'room'}, $obj, $st) < 0);
+        if ($predicate) {
+            my $fn = eval('\&z_' . $predicate);
+            next unless &$fn(@rule);
+        }
         my ($tgt, $msg) = splitAndFill(qr/\|/, $t0, 2);
         $msg = z_teleport($tgt) . ($msg?"\n$msg":'') if ($tgt);
         return msgrand($msg);

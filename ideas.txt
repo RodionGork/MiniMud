@@ -9,6 +9,7 @@
 - mobiles wandering, attacking users, perhaps talking
 - timer actions (auto-closing door after it is opened etc)
 - export to wizard commands (optional)
+- cleanup command predicate syntax (seemingly now there are 2 variants)
 
 * commands at places (including view)
 * commands everywhere to be described in data file and added by wizard, rather than hardcoded

@@ -72,7 +72,8 @@ look
 !addroom yard School yard|Path stretches along the pink building from E to W
 !addway start e|pass yard|passkey helps to pass the gates...
 !addway yard w|pass|0 start
-!addway yard ne|pass|1 park
+!addway yard ne?haveObj|pass|1 park
+!addway yard ne |Back exit needs passkey
 !addway start e |You can't pass the great gates.
 !addcmd start use\s+pass [haveObj pass] You applied the passkey and went through the gates; @teleport yard
 !addroom pond Here is a small pond in the park. Small path winds south.

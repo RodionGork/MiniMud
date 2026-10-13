@@ -102,6 +102,12 @@ wizpwd JE0PPA
 вв
 !addroom park В парке|Вы бредёте по зеленому парку, над головой\
     в листве чирикают птички; дыра в заборе ведёт на юго-запад.
+!addroom pondm Чёрное Болото|Это тёмное болото и здесь сидит Лягух-Царевич.
+!addroom pondf Зелёное Болото|Это светлое болото и здесь сидит Лягушка-Царевна.
+!addway park св?haveGender|f pondf
+!addway park св pondm
+!addway pondm ю park
+!addway pondf ю park
 !putobj park camomile
 !addway gates с park
 !addway park юз gates
