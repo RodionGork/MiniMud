@@ -32,19 +32,34 @@ if (@ARGV < 1) {
 my $uid = $ARGV[0];
 
 if (@ARGV > 1) {
-    for my $cmd (split /\;\s*/, $ARGV[1]) {
-        chomp $cmd;
-        print "executing: $cmd\n" . parseColors(runCmd($uid, $cmd)) . "\n";
+    my @cmds = split /\;\s*/, $ARGV[1];
+    my ($file) = $cmds[-1] =~ /load\s+(\S+\.txt)/;
+    if ($file) {
+        open(my $f, '<', $file);
+        my @file = <$f>;
+        close($f);
+        pop @cmds;
+        push @cmds, grep(!/^(?:;.*|\s*)$/, @file);
     }
-} else {
-    my $cmds = meta('cmds');
-    my $lookcmd = '';
-    for my $c (@$cmds) {
-        $lookcmd = $$c[0] if ($$c[1] eq '@look');
+    for (my $i = 0; $i < @cmds; $i++) {
+        my $cmd = trim($cmds[$i]);
+        while ($i+1 < @cmds && $cmds[$i+1] =~ /^\s/) {
+            $cmd .= ' ' . trim($cmds[++$i]);
+        }
+        print parseColors(runCmd($uid, $cmd)) . "\n";
     }
-    print "Auto executing '$lookcmd' command...\n";
-    print parseColors(runCmd($uid, $lookcmd)) . "\n";
+    dbcommit();
+    print "(done)\n";
+    exit;
 }
+
+my $cmds = meta('cmds');
+my $lookcmd = '';
+for my $c (@$cmds) {
+    $lookcmd = $$c[0] if ($$c[1] eq '@look');
+}
+print "Auto executing '$lookcmd' command...\n";
+print parseColors(runCmd($uid, $lookcmd)) . "\n";
 
 while (1) {
     my $ur = '';
