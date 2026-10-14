@@ -14,12 +14,16 @@ function addDiv(cls, text) {
     div.classList.add(cls);
     div.innerHTML = text;
     document.body.insertBefore(div, input.parentElement);
+    scrollToBottom();
+}
+
+function scrollToBottom() {
     document.body.scrollTo(0, document.body.scrollHeight - document.body.clientHeight);
 }
 
 var commError = false;
-var chkevtToBase = 4000;
-var chkevtToVar = 3000;
+var chkevtToBase = 2000;
+var chkevtToVar = 1000;
 
 function sendCmd(cmd) {
     nextEventCheck = new Date().getTime() + chkevtToBase + Math.round(Math.random() * chkevtToVar);
@@ -58,7 +62,7 @@ function sendCmd(cmd) {
 function respond(text) {
     text = text.trim();
     if (text.match(/^http.*(?:jpg|png|gif)$/) !== null) {
-        text = `<img src="${text}"/>`;
+        text = `<img src="${text}" onload="scrollToBottom()"/>`;
     } else {
         text = text.replace(/%:(.)/g, (m, c) => `<span class="x-${c[0]}">`)
             .replace(/:%/g, `</span>`).replace(/\n/g, '<br/>');
@@ -80,5 +84,5 @@ function eventsCheck() {
     sendCmd('chkevt');
 }
 
-var eventTimer = setInterval(eventsCheck, 1000 + Math.floor(Math.random()*100));
+var eventTimer = setInterval(eventsCheck, 500 + Math.floor(Math.random()*50));
 
