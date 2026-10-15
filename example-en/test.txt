@@ -1,89 +1,89 @@
-!addcmd * look @look
-!addcmd * inv(?:entory)? @inv"
-!addcmd * get\s+(\S+) @get $1
-!addcmd * drop\s+(\S+) @drop $1
-!addcmd * give\s+(\S+)(?:\s+to)?\s+(\S+) @give $1 $2
-!addcmd * (?:go\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out) @walk $1
-!addcmd * say\s+(\S.*) @say $1
-!addcmd * ways @ways
-!addcmd * view @examine here
-!addcmd * (?:x|exam(?:ine)?)\s+(?:my)?self @examine self
-!addcmd * (?:x|exam(?:ine)?)\s+(\S+) @examine $1
-!addcmd * ready Banzai! :)
-!addcmd * pinch\s+(\S+) @social $1 pinched
-!addcmd * kiss\s+(\S+) @social $1 kissed
-!addcmd * haha You laugh heartily: ha-ha-ha!
-!addcmd * myself\s+(\S.*) @chdescr $1
-!addcmd * killself @reset
+!cmd * look @look
+!cmd * inv(?:entory)? @inv"
+!cmd * get\s+(\S+) @get $1
+!cmd * drop\s+(\S+) @drop $1
+!cmd * give\s+(\S+)(?:\s+to)?\s+(\S+) @give $1 $2
+!cmd * (?:go\s+)?(n|s|e|w|ne|nw|se|sw|u|d|in|out) @walk $1
+!cmd * say\s+(\S.*) @say $1
+!cmd * ways @ways
+!cmd * view @examine here
+!cmd * (?:x|exam(?:ine)?)\s+(?:my)?self @examine self
+!cmd * (?:x|exam(?:ine)?)\s+(\S+) @examine $1
+!cmd * ready Banzai! :)
+!cmd * pinch\s+(\S+) @social $1 pinched
+!cmd * kiss\s+(\S+) @social $1 kissed
+!cmd * haha You laugh heartily: ha-ha-ha!
+!cmd * myself\s+(\S.*) @chdescr $1
+!cmd * killself @reset
 
-!addmsg said $u mumbled: $1
-!addmsg asked $u asked: $1
-!addmsg excld $u exclaimed: $1
-!addmsg enters enters $u
-!addmsg exits exits $u
-!addmsg hereare Here are: $1
-!addmsg hereuser $1 stands here
-!addmsg heresleep $1 sleeps here|$1 is resting here
-!addmsg inv You have: $1
-!addmsg inv-none You don't have any stuff with you!
-!addmsg get $1 taken
-!addmsg give $1 given to $2
-!addmsg granted You got $1
-!addmsg drop $1 dropped
-!addmsg lost $1 inadvertently fell from your hands
-!addmsg disint $1 have fallen to pieces just as it touched the ground
-!addmsg disapp $1 have mystically disappeared as it touched the ground
-!addmsg noobj Here is nothing like that!
-!addmsg nodescr You see nothing special
-!addmsg noget You can't take this!
-!addmsg haveno You have nothing like that!
-!addmsg nouserhere You don't see such $1 here!
-!addmsg noway You can't pass there|There is no way
-!addmsg newuser Enter 'ready' if you want to start the game!
-!addmsg namechanged Name changed successfully to $1
-!addmsg descrchanged Description updated successfully
-!addmsg greetnew Welcome to the game, start with entering 'look' command
-!addmsg nouserrst Get rid of your inventory first
-!addmsg userreset Hooray, character deleted! And what next?
-!addmsg nocmd Sorry, I don't understand that|Unknown command
-!addmsg social You $1 $2
-!addmsg funny (so funny)
-!addmsg ways You see ways to: $1
-!addmsg you You
+!msg said $u mumbled: $1
+!msg asked $u asked: $1
+!msg excld $u exclaimed: $1
+!msg enters enters $u
+!msg exits exits $u
+!msg hereare Here are: $1
+!msg hereuser $1 stands here
+!msg heresleep $1 sleeps here|$1 is resting here
+!msg inv You have: $1
+!msg inv-none You don't have any stuff with you!
+!msg get $1 taken
+!msg give $1 given to $2
+!msg granted You got $1
+!msg drop $1 dropped
+!msg lost $1 inadvertently fell from your hands
+!msg disint $1 have fallen to pieces just as it touched the ground
+!msg disapp $1 have mystically disappeared as it touched the ground
+!msg noobj Here is nothing like that!
+!msg nodescr You see nothing special
+!msg noget You can't take this!
+!msg haveno You have nothing like that!
+!msg nouserhere You don't see such $1 here!
+!msg noway You can't pass there|There is no way
+!msg newuser Enter 'ready' if you want to start the game!
+!msg namechanged Name changed successfully to $1
+!msg descrchanged Description updated successfully
+!msg greetnew Welcome to the game, start with entering 'look' command
+!msg nouserrst Get rid of your inventory first
+!msg userreset Hooray, character deleted! And what next?
+!msg nocmd Sorry, I don't understand that|Unknown command
+!msg social You $1 $2
+!msg funny (so funny)
+!msg ways You see ways to: $1
+!msg you You
 
-!addroom start School gates|You are standing before the high iron school gates,
+!room start School gates|You are standing before the high iron school gates,
     beyond them to W is a long yard along the pink school building;
     hole in the fence leads to N
-!addrdescr start This is a starting room.
-!addcmd start look\s+around https://i.imgur.com/rtWo2N4.png
+!rdescr start This is a starting room.
+!cmd start look\s+around https://i.imgur.com/rtWo2N4.png
     You are in front of high metal gates with a school yard behind them
     and pink building on the right
-!addobj ball heavy leather ball
-!addodescr ball Almost regular polyhedron made of 32 leather polygons.
+!obj ball heavy leather ball
+!odescr ball Almost regular polyhedron made of 32 leather polygons.
 !putobj start ball
 look
-!addroom park In the park|You are wandering in a green park,
+!room park In the park|You are wandering in a green park,
     with birds chirping above; hole in the fence is to SE and
     low croacks are sometimes heard from the opposite direction.
-!addobj urn trash can #noget #weight:100 #s:park
-!addcmd park fart You've made a great sound!
-!addway start n park
-!addway park se start
-!addroom yard School yard|Path stretches along the pink building from E to W
-!addway start e|pass yard|passkey helps to pass the gates...
-!addway yard w|pass|0 start
-!addway yard ne?haveObj|pass|1 park
-!addway yard ne |Back exit needs passkey
-!addway start e |You can't pass the great gates.
-!addcmd start use\s+pass [haveObj pass] You applied the passkey and went through the gates; @teleport yard
-!addroom pond Here is a small pond in the park. Small path winds south.
-!addobj frog Cute Frog sits here with a small crown on her head #noget #s:pond
-!addway park nw pond
-!addway pond s park
-!addobj arrow feathered arrow with thin steel point #nodrop #nogive
-!addcmd pond kiss\s+frog [haveObj arrow] Frog smiled and flushed
-!addcmd pond kiss\s+frog Frog exclaimed "bloody zoophile", flushed and gave you a small arrow; @grant arrow
-!addobj pass:passkey,passcard,keycard white passcard | broken passkey #nodrop #s:park,pond #init:1
+!obj urn trash can #noget #weight:100 #s:park
+!cmd park fart You've made a great sound!
+!way start n park
+!way park se start
+!room yard School yard|Path stretches along the pink building from E to W
+!way start e|pass yard|passkey helps to pass the gates...
+!way yard w|pass|0 start
+!way yard ne?haveObj|pass|1 park
+!way yard ne |Back exit needs passkey
+!way start e |You can't pass the great gates.
+!cmd start use\s+pass [haveObj pass] You applied the passkey and went through the gates; @teleport yard
+!room pond Here is a small pond in the park. Small path winds south.
+!obj frog Cute Frog sits here with a small crown on her head #noget #s:pond
+!way park nw pond
+!way pond s park
+!obj arrow feathered arrow with thin steel point #nodrop #nogive
+!cmd pond kiss\s+frog [haveObj arrow] Frog smiled and flushed
+!cmd pond kiss\s+frog Frog exclaimed "bloody zoophile", flushed and gave you a small arrow; @grant arrow
+!obj pass:passkey,passcard,keycard white passcard | broken passkey #nodrop #s:park,pond #init:1
 say Here is no hren!
 get hren
 exam ball

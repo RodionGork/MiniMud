@@ -8,7 +8,7 @@ sub wizCmd {
     return 'Unknown wiz command';
 }
 
-sub w_addcmd {
+sub w_cmd {
     my ($rid, $pattern, $action) = splitAndFill(' ', $_[0], 3);
     if ($rid eq '*') {
         my $cmds = meta('cmds');
@@ -23,7 +23,7 @@ sub w_addcmd {
     return "command added to room #$rid";
 }
 
-sub w_addobj {
+sub w_obj {
     my ($tag, $descr) = splitAndFill(' ', $_[0], 2);
     my ($oid, $synonyms) = splitAndFill(':', $tag, 2);
     my $proto = initObj $descr, $synonyms;
@@ -35,25 +35,25 @@ sub w_addobj {
     return "obj #$oid added$where";
 }
 
-sub w_addodescr {
+sub w_odescr {
     my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
     objdescr($oid, $descr);
     return "descr added for object #$oid";
 }
 
-sub w_addrdescr {
+sub w_rdescr {
     my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
     roomdescr($rid, $descr);
     return "descr added for room #$rid";
 }
 
-sub w_addmsg {
+sub w_msg {
     my ($key, $phrase) = splitAndFill(' ', $_[0], 2);
     msgs($key, $phrase);
     return "message added for #$key";
 }
 
-sub w_addroom {
+sub w_room {
     my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
     room($rid, initRoom($descr));
     my $roomst = roomstate($rid);
@@ -61,7 +61,7 @@ sub w_addroom {
     return "room $rid added";
 }
 
-sub w_addway {
+sub w_way {
     my ($rid1, $dir) = splitAndFill(' ', $_[0], 2);
     my $room = room($rid1);
     return 'No source room' if (!$room);
