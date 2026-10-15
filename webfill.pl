@@ -8,34 +8,34 @@ use Encode;
 require 'kernel.pl';
 require 'tokens.pl';
 
-if (@ARGV < 1) {
-    print "Please specify token as the first argument!\n";
+if (@ARGV < 2) {
+    print "Please specify token as the first argument, wizpwd as the second and filename as the third!\n";
     exit(1);
 }
 
 my $token = $ARGV[0];
+my $wizpwd = $ARGV[1];
+my $file = $ARGV[2];
 
 my ($uid, $url, $ts) = parseToken($token);
 
 my $http = HTTP::Tiny->new;
 
-while (1) {
-    my $ur = '';
-    while (1) {
-        my $line = <STDIN>;
-        $line = 'quit' unless defined $line;
-        $line = trim($line);
-        next if !$line || substr($line, 0, 1) eq ';';
-        $ur .= $line;
-        last if (substr($ur, -1) ne '\\');
-        $ur = substr($ur, 0, -1) . ' ';
+open(my $f, '<', $file);
+my @cmds = <$f>;
+close($f);
+@cmds = grep(!/^(?:;.*|\s*)$/, @cmds);
+unshift @cmds, "wizpwd $wizpwd";
+unshift @cmds, "ready";
+
+for (my $i = 0; $i < @cmds; $i++) {
+    my $cmd = trim($cmds[$i]);
+    while ($i+1 < @cmds && $cmds[$i+1] =~ /^\s/) {
+        $cmd .= ' ' . trim($cmds[++$i]);
     }
-    if ($ur eq 'quit') {
-        print "ok, bye!\n";
-        dbcommit();
-        last;
-    }
-    my $resp = $http->request('POST', $url, {content => $token . "\n" . encode('UTF-8', trim($ur))});
+    my $resp = $http->request('POST', $url, {content => $token . "\n" . encode('UTF-8', trim($cmd))});
     print decode('UTF-8', $$resp{content}) . "\n";
 }
+print "ok, bye!\n";
+dbcommit();
 
