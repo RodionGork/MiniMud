@@ -70,7 +70,10 @@ sub kvload {
 }
 
 sub kvnuke {
-    $db->do('delete from kv');
+    my $withusers = $_[0];
+    my $query = 'delete from kv';
+    $query .= ' where k not like \'%-u\' and k not like \'%-ud\' and k not like \'%-h\'' unless $withusers;
+    $db->do($query);
 }
 
 1;

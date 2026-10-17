@@ -96,8 +96,9 @@ sub w_load {
 }
 
 sub w_nukedb {
-    kvnuke();
-    return 'database nuked';
+    my $withusers = $_[0] || 0;
+    kvnuke($withusers);
+    return 'database nuked' . $withusers;
 }
 
 sub w_putobj {
