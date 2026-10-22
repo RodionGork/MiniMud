@@ -16,8 +16,9 @@ if ($lang) {
 
 our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
 our $pathMem = 20;
-our $goSleepTime = 30;
-our $goExpiredTime = 60;
+our $timeScale = $ENV{'MUD_TIMESCALE'} // 1;
+our $goSleepTime = 300 / $timeScale;
+our $goExpiredTime = 600 / $timeScale;
 our $maxObjInHands = 2;
 
 my $cur;
@@ -96,6 +97,7 @@ sub hasObj {
 }
 
 sub hereUser {
+    return 0, '' if +($$cur{'room'}{'f'}//{})->{'loner'}//0;
     my $target = $_[0];
     my $case = @_ > 1 ? $_[1] : 0;
     my $users = $$cur{'roomst'}{'u'};
@@ -108,21 +110,31 @@ sub hereUser {
     return 0, '';
 }
 
-sub initObj {
-    my ($text, $synonyms) = @_;
-    my @arg = split /\s+#/, $text;
-    my @descr = split /\|/, shift @arg;
-    $_ = trim($_) for (@descr);
-    my $res = {'d' => \@descr, 'f' => {}, 's' => $synonyms};
-    for my $flag (@arg) {
-        my ($f, $v) = split /:/, $flag;
-        $$res{'f'}{$f} = numOrStr($v||1);
+sub parseTrailingFlags {
+    my @arg = split /\s+#/, $_[0];
+    my $text = shift @arg;
+    my $flags = {};
+    for my $a (@arg) {
+        my ($f, $v) = split /:/, $a;
+        $$flags{$f} = numOrStr($v||1);
     }
+    return ($text, $flags);
+}
+
+sub initObj {
+    my ($textWithFlags, $synonyms) = @_;
+    my ($text, $flags) = parseTrailingFlags($textWithFlags);
+    my @descr = split /\|/, $text;
+    $_ = trim($_) for (@descr);
+    my $res = {'d' => \@descr, 'f' => $flags, 's' => $synonyms};
     return $res;
 }
 
 sub initRoom {
-    return {'d' => $_[0], 'w'=> []};
+    my ($text, $flags) = parseTrailingFlags($_[0]);
+    my $res = {'d' => $text, 'w'=> []};
+    $$res{'f'} = $flags if %$flags;
+    return $res;
 }
 
 sub initUser {
@@ -245,6 +257,7 @@ sub notify {
     my $uid = $$cur{'uid'};
     my $rs = $$cur{'roomst'};
     my $users = $$rs{'u'};
+    return if +($$cur{'room'}{'f'}//{})->{'loner'}//0;
     for my $id (keys %$users) {
         my $urec = $$users{$id};
         next if $id eq $uid;
@@ -533,11 +546,12 @@ sub z_look {
     $res .= "\n$long" if ($long && !($short && grep($_ eq $rid, @{$$cur{'user'}{'seen'}})));
     my @objdescr = map paint($$_[2], 'O'), @{$$roomst{'o'} || []};
     $res .= "\n" . msg('hereare', join(', ', @objdescr)) if (@objdescr);
+    my $loner = +($$room{'f'}//{})->{'loner'}//0;
     for my $u (keys %{$$roomst{'u'}}) {
         next if ($u eq $$cur{'uid'});
         my @urec = @{$$roomst{'u'}{$u}};
         unless (isExpiring($urec[1])) {
-            $res .= "\n" . paint(msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]), 'U');
+            $res .= "\n" . paint(msg(isAwake($urec[1]) ? 'hereuser' : 'heresleep', $urec[0]), 'U') unless $loner;
         } else {
             expireChar($u, $rid, $roomst);
         }
@@ -595,6 +609,7 @@ sub z_teleport {
     roomstate($where, $rsnew);
     msg('exits', $h);
     $$cur{'rid'} = $where;
+    $$cur{'room'} = room($where);
     $$cur{'roomst'} = $rsnew;
     msg('enters', $h);
     return $newLook;

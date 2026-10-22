@@ -76,7 +76,7 @@ look
 !way yard ne |Back exit needs passkey
 !way start e |You can't pass the great gates.
 !cmd start use\s+pass [haveObj pass] You applied the passkey and went through the gates; @teleport yard
-!room pond Here is a small pond in the park. Small path winds south.
+!room pond Here is a small pond in the park. Small path winds south. #loner
 !obj frog Cute Frog sits here with a small crown on her head #noget #s:pond
 !way park nw pond
 !way pond s park
