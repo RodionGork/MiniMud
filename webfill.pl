@@ -8,7 +8,7 @@ use Encode;
 require 'kernel.pl';
 require 'tokens.pl';
 
-if (@ARGV < 2) {
+if (@ARGV < 3) {
     print "Please specify token as the first argument, wizpwd as the second and filename as the third!\n";
     exit(1);
 }

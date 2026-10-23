@@ -18,7 +18,7 @@ input { width: 100%; background-color: #444; color: #3f3; font-family: monospace
 .x-p { color: #f55; font-weight: bold }
 .x-y { color: yellow }
 .x-x { color: yellow; font-weight: bold }
-.x-b { color: blue }
-.x-v { color: #33f; font-weight: bold }
+.x-b { color: #34f }
+.x-v { color: #67f; font-weight: bold }
 .x-w { color: #fff; font-weight: bold }
 
