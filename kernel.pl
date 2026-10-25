@@ -586,7 +586,7 @@ sub z_social {
     if ($_[-1] =~ /\d+/) {
         $case = pop @_;
     }
-    my $action = join ' ', @_;
+    my $action = msgrand join ' ', @_;
     my ($whomid, $nameCase) = hereUser($whom, $case);
     return msg('nouserhere', $whom) unless $whomid;
     return msg('social' . $case, $action, $whomid, $whom);
