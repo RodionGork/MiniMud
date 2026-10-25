@@ -16,23 +16,25 @@ bulk-loading lengthy world setup from file.
 
 Firstly it makes sense to create some rooms.
 
-    !addroom roomid Room title|Longer description
+    !room roomid Room title|Longer description
 
 Users start in the room with id `start` (it makes sense to create this early).
 
-    !addcmd roomid cmd action1; ...; action2
+    !cmd roomid cmd action1; ...; action2
 
 Commands could be added to specific room or globally (with `*` instead of roomid).
 Here "cmd" part could be simple word, like `look` or contain arguments. Overall
 syntax of "cmd" is regexp and arguments are captured as regexp groups. Initially
 it makes sense to add commands for looking and walking around, e.g.
 
-    !addcmd * look @look
-    !addcmd * (n|s|w|e) @walk $1
-    !addcmd * get\s+(\S+) @get $1
-    !addcmd * giggle You giggled
-    !addcmd pond kiss\s+frog Frog gave you an arrow; @grant arrow
-    !addcmd palace give\s+arrow\s+(?:to\s+)?king @~drop arrow; King smiled and blessed you
+    !cmd * look @look
+    !cmd * (n|s|w|e) @walk $1
+    !cmd * get\s+(\S+) @get $1
+    !cmd * giggle You giggled
+    !cmd pond kiss\s+frog Frog gave you an arrow; @grant arrow
+    !cmd palace give\s+arrow\s+(?:to\s+)?king @~drop arrow; King smiled and blessed you
+    !cmd gates use\s+passkey [haveObj passkey] You applied the passkey and went through the gates; @teleport yard
+    !cmd gates use\s+passkey @haveObj passkey teleport yard
 
 Symbol `@` in the action means that internal command with given name should be called,
 perhaps passing arguments (i.e. captured groups) to it. Otherwise action is treated as
@@ -40,17 +42,23 @@ a message to be printed. Tilde symbol allows to "hush" the command output - e.g.
 example we want the object to disappear from inventory, but user shouldn't see message like
 "arrow falls on the ground and disappeared".
 
-For convenience some general commands are defined in `cmds-en.json` (json files could be
-imported with dedicated command but `cmds-xx.json` and `msgs-xx.json` are loaded automatically
-when the very first user comes. Language is selected by `MUD_LANG` env variable.
+Predicate `[...]` in square brackets allows to call suitable internal function,
+e.g. checking whether character has certain object, certain gender etc. If
+predicate function evaluates to false the corresponding command is not activated
+and search for suitable command falls down to next ones in list.
+
+Seemingly we have functionality similar to predicates with chaining commands
+(as in the last example) but this is probably more limited remnant.
+
+Language is selected by `MUD_LANG` env variable.
 
 Now we can add ways between the rooms. Path is something respected by `walk` internal command.
 
-    !addway room dir where
-    !addway room dir|obj where
-    !addway room dir|obj|state where
-    !addway room dir|obj|state where|message
-    !addway room dir |message
+    !way room dir where
+    !way room dir|obj where
+    !way room dir|obj|state where
+    !way room dir|obj|state where|message
+    !way room dir |message
 
 In the simplest form you specify two room ids (`room` and `where`) while `dir` is some direction
 word which we allowed to be passed into `walk` command somewhere above. E.g. if we enter `se` for
@@ -69,8 +77,12 @@ the message is printed (generally, explaining why user can't go that way).
 
 It allows to chain several commands for the same direction, like this:
 
-    !addway gates n|passcard mainhall|You used passcard to enter Main Hall
-    !addway gates n|passcard|1 |You can't enter as your passcard is broken
-    !addway gates n |You need a passcard to pass here!
+    !way gates n|passcard mainhall|You used passcard to enter Main Hall
+    !way gates n|passcard|1 |You can't enter as your passcard is broken
+    !way gates n |You need a passcard to pass here!
+    !way park e?haveGender|m bog1
+
+Quetion mark after `dir` allows to put predicate function with its arguments
+here similarly to how it is done in commands.
 
 _to be continued_

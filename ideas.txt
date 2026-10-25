@@ -1,17 +1,20 @@
 - commands on objects
 - user flags and checks for them in commands
-- descriptions for places
-- blind/deaf rooms (disabled interactions with other players)
 - objects expiration
 - wizard impersonation
+- wizard teleportation
+- wizard watching user activity
 - user registering and banning
-- user restart and self-delete
 - mobiles wandering, attacking users, perhaps talking
 - timer actions (auto-closing door after it is opened etc)
 - export to wizard commands (optional)
 - cleanup command predicate syntax (seemingly now there are 2 variants)
 - add zones for locations (objects, commands)
+- webfill script should use commands in bulk
 
+* descriptions for places
+* blind/deaf rooms (disabled interactions with other players)
+* user restart and self-delete
 * commands at places (including view)
 * commands everywhere to be described in data file and added by wizard, rather than hardcoded
 * command localization (introduced with command customization)
