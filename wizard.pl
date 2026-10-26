@@ -1,5 +1,6 @@
 use v5.16;
 use warnings;
+use Encode qw(decode);
 
 sub wizCmd {
     my ($cmd, $tail) = splitAndFill(' ', $_[0], 2);
@@ -21,53 +22,6 @@ sub w_cmd {
     push @{$$room{'c'}}, [$pattern, $action];
     room($rid, $room);
     return "command added to room #$rid";
-}
-
-sub w_obj {
-    my ($tag, $descr) = splitAndFill(' ', $_[0], 2);
-    my ($oid, $synonyms) = splitAndFill(':', $tag, 2);
-    my $proto = initObj $descr, $synonyms;
-    obj($oid, $proto);
-    my $where = instObj($oid, $proto);
-    if ($where) {
-        $where = " and put to room #$where";
-    }
-    return "obj #$oid added$where";
-}
-
-sub w_odescr {
-    my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
-    objdescr($oid, $descr);
-    return "descr added for object #$oid";
-}
-
-sub w_rdescr {
-    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
-    roomdescr($rid, $descr);
-    return "descr added for room #$rid";
-}
-
-sub w_msg {
-    my ($key, $phrase) = splitAndFill(' ', $_[0], 2);
-    msgs($key, $phrase);
-    return "message added for #$key";
-}
-
-sub w_room {
-    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
-    room($rid, initRoom($descr));
-    my $roomst = roomstate($rid);
-    roomstate($rid, {}) if (!$roomst);
-    return "room $rid added";
-}
-
-sub w_way {
-    my ($rid1, $dir) = splitAndFill(' ', $_[0], 2);
-    my $room = room($rid1);
-    return 'No source room' if (!$room);
-    push @{$$room{'w'}}, $dir;
-    room($rid1, $room);
-    return "path from $rid1 added";
 }
 
 sub w_import {
@@ -95,10 +49,41 @@ sub w_load {
     return $res . "data file $fname loaded";
 }
 
+sub w_log {
+    my @params = split(/ /, @_[0]//'');
+    my $cmd = 'tail -n' . (pop(@params)||7) . ' _game.log';
+    $cmd .= "|head -n${params[0]}" if @params;
+    return decode('UTF-8', `$cmd`);
+}
+
+sub w_msg {
+    my ($key, $phrase) = splitAndFill(' ', $_[0], 2);
+    msgs($key, $phrase);
+    return "message added for #$key";
+}
+
 sub w_nukedb {
     my $withusers = $_[0] || 0;
     kvnuke($withusers);
     return 'database nuked' . $withusers;
+}
+
+sub w_obj {
+    my ($tag, $descr) = splitAndFill(' ', $_[0], 2);
+    my ($oid, $synonyms) = splitAndFill(':', $tag, 2);
+    my $proto = initObj $descr, $synonyms;
+    obj($oid, $proto);
+    my $where = instObj($oid, $proto);
+    if ($where) {
+        $where = " and put to room #$where";
+    }
+    return "obj #$oid added$where";
+}
+
+sub w_odescr {
+    my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
+    objdescr($oid, $descr);
+    return "descr added for object #$oid";
 }
 
 sub w_putobj {
@@ -108,10 +93,39 @@ sub w_putobj {
     return $err ? $err : "obj #$oid added to room #$rid";
 }
 
+sub w_rdescr {
+    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
+    roomdescr($rid, $descr);
+    return "descr added for room #$rid";
+}
+
+sub w_room {
+    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
+    room($rid, initRoom($descr));
+    my $roomst = roomstate($rid);
+    roomstate($rid, {}) if (!$roomst);
+    return "room $rid added";
+}
+
 sub w_save {
     my $fname = $_[0] || 'gamedata.json';
     kvsave($fname);
     return "data file $fname saved";
+}
+
+sub w_tlpt {
+    my $tgt = shift @_;
+    return 'no such room' if !defined room($tgt);
+    return z_teleport($tgt);
+}
+
+sub w_way {
+    my ($rid1, $dir) = splitAndFill(' ', $_[0], 2);
+    my $room = room($rid1);
+    return 'No source room' if (!$room);
+    push @{$$room{'w'}}, $dir;
+    room($rid1, $room);
+    return "path from $rid1 added";
 }
 
 1;
