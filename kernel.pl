@@ -520,13 +520,13 @@ sub z_haveGender {
 
 sub z_haveObj {
     my ($obj, $state) = split /=/, $_[0], 2;
+    $state = $_[1] if !defined($state);
     return hasObj($$cur{'user'}, $obj, $state) >= 0;
 }
 
 sub z_hereObj {
     my ($obj, $state) = split /=/, $_[0], 2;
     $state = $_[1] if !defined($state);
-    print "HEREOBJ: $obj $state\n";
     return hasObj($$cur{'roomst'}, $obj, $state) >= 0;
 }
 
@@ -640,12 +640,11 @@ sub z_walk {
     for my $way (@{$$cur{'room'}{'w'}}) {
         my ($d0, $t0) = split / /, $way, 2;
         $d0 =~ s/^\.//;
-        my @rule = split /\|/, $d0;
-        my $rulehead = shift @rule;
-        my ($d, $d2) = split /\?/, $rulehead;
-        my $predicate = $d2 || (@rule ? 'haveObj' : '');
+        my ($d, $rulestr) = split /\?/, $d0, 2;
         next unless ($d eq $dir);
-        if ($predicate) {
+        if (defined $rulestr) {
+            my @rule = split /\|/, $rulestr;
+            my $predicate = shift @rule;
             my $fn = eval('\&z_' . $predicate);
             next unless &$fn(@rule);
         }

@@ -86,8 +86,8 @@ look
 !room towerin Inside Water Tower|Creaky iron staircase spirals up here. The only door leads outwards.
 !way towerin out tower
 !room yard School yard|Path stretches along the pink building from E to W
-!way start e|pass yard|passkey helps to pass the gates...
-!way yard w|pass|0 start
+!way start e?haveObj|pass yard|passkey helps to pass the gates...
+!way yard w?haveObj|pass|0 start
 !way yard ne?haveObj|pass|1 park
 !way yard ne |Back exit needs passkey
 !way start e |You can't pass the great gates.

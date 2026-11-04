@@ -115,8 +115,8 @@ wizpwd JE0PPA
 !room yard Школьный двор|Не столько двор, а дорожка вдоль здания
     и газончик вдоль дорожки - тянутся с востока на запад. Растут
     ёлочки, видны несколько клумб.
-!way gates в|pass yard|passkey helps to pass the gates...
-!way yard з|pass|0 gates
+!way gates в?haveObj|pass yard|passkey helps to pass the gates...
+!way yard з?haveObj|pass|0 gates
 !way gates в |Через ворота так просто не перелезть...
 !cmd gates исп(?:ольз)?\s+пропуск @haveObj pass teleport yard
 сказ нету хрена!
