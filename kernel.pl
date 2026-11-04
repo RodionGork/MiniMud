@@ -269,14 +269,17 @@ sub notify {
 }
 
 sub objFromRoom {
-    my $what = $_[0];
+    my ($what, $op) = @_;
     my $roomst = $$cur{'roomst'};
     my $idx = hasObj($roomst, $what);
     return msg('noobj') if ($idx < 0);
     my $oid = $$roomst{'o'}[$idx][0];
     my $proto = obj($oid);
-    return msg('noget') if (exists $$proto{'f'}{'noget'});
-    my $obj = splice @{$$roomst{'o'}}, $idx, 1;
+    my $obj = $$roomst{'o'}[$idx];
+    if (!defined $op) {
+        return msg('noget') if exists $$proto{'f'}{'noget'};
+        splice @{$$roomst{'o'}}, $idx, 1;
+    }
     return '', $what, $obj, $proto;
 }
 
@@ -520,6 +523,13 @@ sub z_haveObj {
     return hasObj($$cur{'user'}, $obj, $state) >= 0;
 }
 
+sub z_hereObj {
+    my ($obj, $state) = split /=/, $_[0], 2;
+    $state = $_[1] if !defined($state);
+    print "HEREOBJ: $obj $state\n";
+    return hasObj($$cur{'roomst'}, $obj, $state) >= 0;
+}
+
 sub z_inv {
     my $user = $$cur{'user'};
     my @objdescr = map $$_[2], @{$$user{'o'} || []};
@@ -558,6 +568,16 @@ sub z_look {
     }
     markSeen($rid);
     return $res;
+}
+
+sub z_objState {
+    my ($target, $change) = @_;
+    my ($msg, $what, $obj, $proto) = objFromRoom($target, 1);
+    return $msg unless defined($obj);
+    $$obj[1] = $change;
+    $$obj[2] = $$proto{'d'}[$change];
+    roomstate($$cur{'rid'}, $$cur{'roomst'});
+    return msg('ok');
 }
 
 sub z_reset {

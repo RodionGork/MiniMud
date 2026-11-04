@@ -1,5 +1,5 @@
 !cmd * look @look
-!cmd * inv(?:entory)? @inv"
+!cmd * inv(?:entory)? @inv
 !cmd * get\s+(\S+) @get $1
 !cmd * drop\s+(\S+) @drop $1
 !cmd * give\s+(\S+)(?:\s+to)?\s+(\S+) @give $1 $2
@@ -9,6 +9,8 @@
 !cmd * view @examine here
 !cmd * (?:x|exam(?:ine)?)\s+(?:my)?self @examine self
 !cmd * (?:x|exam(?:ine)?)\s+(\S+) @examine $1
+!cmd * open\s+(\S+) @objState $1 0
+!cmd * close\s+(\S+) @objState $1 1
 !cmd * ready Banzai! :)
 !cmd * pinch\s+(\S+) @social $1 pinched
 !cmd * kiss\s+(\S+) @social $1 kissed
@@ -49,6 +51,7 @@
 !msg social You $1 $2
 !msg funny (so funny)
 !msg ways You see ways to: $1
+!msg ok Ok|Done|All right
 !msg you You
 
 !room start School gates|You are standing before the high iron school gates,
@@ -69,6 +72,19 @@ look
 !cmd park fart You've made a great sound!
 !way start n park
 !way park se start
+!way park w parkcrs
+!room parkcrs Crossing in the Park|Here the path from east comes to larger alley going north-south,
+  but the gates to south are closed and way to north is under construction. Professor's house is visible
+  to the west and small path goes diagonally between the trees to NE.
+!way parkcrs e park
+!way parkcrs ne tower
+!room tower Water Tower|Here is an old yellow water tower. In the past it was used both to supply water
+  to the buildings of Polytech - and also for studies of hydraulic engineers.
+!way tower sw parkcrs
+!way tower in?hereObj|towerdoor|0 towerin
+!obj towerdoor:door Door, wide open | Wooden door, closed #noget #s:tower #init:1
+!room towerin Inside Water Tower|Creaky iron staircase spirals up here. The only door leads outwards.
+!way towerin out tower
 !room yard School yard|Path stretches along the pink building from E to W
 !way start e|pass yard|passkey helps to pass the gates...
 !way yard w|pass|0 start

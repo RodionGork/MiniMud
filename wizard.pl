@@ -50,7 +50,7 @@ sub w_load {
 }
 
 sub w_log {
-    my @params = split(/ /, @_[0]//'');
+    my @params = split(/ /, $_[0]//'');
     my $cmd = 'tail -n' . (pop(@params)||7) . ' _game.log';
     $cmd .= "|head -n${params[0]}" if @params;
     return decode('UTF-8', `$cmd`);
