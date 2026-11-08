@@ -54,6 +54,7 @@
 !msg ok Ok|Done|All right
 !msg you You
 
+!zone sch
 !room start School gates|You are standing before the high iron school gates,
     beyond them to W is a long yard along the pink school building;
     hole in the fence leads to N
@@ -61,17 +62,25 @@
 !cmd start look\s+around https://i.imgur.com/rtWo2N4.png
     You are in front of high metal gates with a school yard behind them
     and pink building on the right
-!obj ball heavy leather ball
+!obj ball heavy leather ball #s:start
 !odescr ball Almost regular polyhedron made of 32 leather polygons.
-!putobj start ball
 look
+!way start n prk.park
+!room yard School yard|Path stretches along the pink building from E to W
+!way start e?haveObj|prk.pass yard|passkey helps to pass the gates...
+!way yard w?haveObj|prk.pass|0 start
+!way yard ne?haveObj|prk.pass|1 prk.park
+!way yard ne |Back exit needs passkey
+!way start e |You can't pass the great gates.
+!cmd start use\s+pass [haveObj prk.pass] You applied the passkey and went through the gates; @teleport yard
+
+!zone prk
 !room park In the park|You are wandering in a green park,
     with birds chirping above; hole in the fence is to SE and
     low croacks are sometimes heard from the opposite direction.
 !obj urn trash can #noget #weight:100 #s:park
 !cmd park fart You've made a great sound!
-!way start n park
-!way park se start
+!way park se sch.start
 !way park w parkcrs
 !room parkcrs Crossing in the Park|Here the path from east comes to larger alley going north-south,
   but the gates to south are closed and way to north is under construction. Professor's house is visible
@@ -85,13 +94,6 @@ look
 !obj towerdoor:door Door, wide open | Wooden door, closed #noget #s:tower #init:1
 !room towerin Inside Water Tower|Creaky iron staircase spirals up here. The only door leads outwards.
 !way towerin out tower
-!room yard School yard|Path stretches along the pink building from E to W
-!way start e?haveObj|pass yard|passkey helps to pass the gates...
-!way yard w?haveObj|pass|0 start
-!way yard ne?haveObj|pass|1 park
-!way yard ne |Back exit needs passkey
-!way start e |You can't pass the great gates.
-!cmd start use\s+pass [haveObj pass] You applied the passkey and went through the gates; @teleport yard
 !room pond Here is a small pond in the park. Small path winds south. #loner
 !obj frog Cute Frog sits here with a small crown on her head #noget #s:pond
 !way park nw pond
@@ -100,6 +102,7 @@ look
 !cmd pond kiss\s+frog [haveObj arrow] Frog smiled and flushed
 !cmd pond kiss\s+frog Frog exclaimed "bloody zoophile", flushed and gave you a small arrow; @grant arrow
 !obj pass:passkey,passcard,keycard white passcard | broken passkey #nodrop #s:park,pond #init:1
+
 say Here is no hren!
 get hren
 exam ball

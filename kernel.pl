@@ -137,15 +137,16 @@ sub initRoom {
 
 sub initUser {
     my $uid = shift @_;
-    my $user = {'rm' => 'start', 'o' => [], 'seen' => [], 'ev' => []};
+    my $start = meta('start') // 'start';
+    my $user = {'rm' => $start, 'o' => [], 'seen' => [], 'ev' => [], 'f' => {}};
     user($uid, $user);
     my $handle = randomHandle();
     my $userd = {'h' => $handle, 'n' => 'Unknown', 'g' => 'f', 'd' => ''};
     userdata($uid, $userd);
     handle($handle, $uid);
-    my $roomst = roomstate('start') // {};
+    my $roomst = roomstate($start) // {};
     $$roomst{'u'}{$uid} = [$handle, 0, $$userd{'n'}];
-    roomstate('start', $roomst);
+    roomstate($start, $roomst);
     return $user;
 }
 
@@ -155,7 +156,7 @@ sub instObj {
     return '' if (!$start);
     my $state = $$proto{'f'}{'init'} // 0;
     my @places = split ',', $start;
-    my $room = $places[int(rand(@places))];
+    my $room = withzone($places[int(rand(@places))], $oid);
     my $err = putObjInt($room, $oid, $state);
     if ($err) {
         print "$err\n";
@@ -293,7 +294,7 @@ sub objFromUser {
 
 sub objNameMatch {
     my ($name, $flex, $oid, $syn) = @_;
-    return 1 if $name eq $oid;
+    return 1 if $name eq $oid || $name eq $oid =~ s/.*\.//r;
     for my $s (split /\,/, $syn) {
         my @cases = split /\|/, $s;
         return 1 if $name eq $cases[$flex < @cases ? $flex : 0];
@@ -383,6 +384,10 @@ sub updateUserTimestamp {
     }
 }
 
+sub withzone {
+    return ($_[0] =~ /\./) ? $_[0] : zone($_[1]) . ".$_[0]";
+}
+
 sub you {
     my $case = $_[0] // 0;
     state @you;
@@ -394,6 +399,11 @@ sub you {
         }
     }
     return $you[$case];
+}
+
+sub zone {
+    my $src = $_[0] // $$cur{'rid'};
+    return $src =~ s/\..*//r;
 }
 
 sub z_chdescr {
@@ -503,7 +513,7 @@ sub z_give {
 }
 
 sub z_grant {
-    my $oid = $_[0];
+    my $oid = withzone($_[0]);
     my $st = 0;
     my $obj = obj($oid);
     return 'No such object' unless ($obj);
@@ -519,6 +529,7 @@ sub z_haveGender {
 sub z_haveObj {
     my ($obj, $state) = split /=/, $_[0], 2;
     $state = $_[1] if !defined($state);
+    $obj = withzone($obj);
     return hasObj($$cur{'user'}, $obj, $state) >= 0;
 }
 
@@ -612,6 +623,7 @@ sub z_social {
 
 sub z_teleport {
     my $where = $_[0];
+    $where = withzone($where);
     my $newLook = z_look($where, 1);
     my $us = $$cur{'user'};
     my $h = $$cur{'userd'}{'h'};

@@ -17,6 +17,7 @@ sub w_cmd {
         meta('cmds', $cmds);
         return 'command added globally';
     }
+    $rid = meta('zone') . ".$rid";
     my $room = room($rid);
     return 'No such room' unless ($room);
     push @{$$room{'c'}}, [$pattern, $action];
@@ -71,7 +72,8 @@ sub w_nukedb {
 sub w_obj {
     my ($tag, $descr) = splitAndFill(' ', $_[0], 2);
     my ($oid, $synonyms) = splitAndFill(':', $tag, 2);
-    my $proto = initObj $descr, $synonyms;
+    $oid = meta('zone') . ".$oid";
+    my $proto = initObj($descr, $synonyms);
     obj($oid, $proto);
     my $where = instObj($oid, $proto);
     if ($where) {
@@ -82,28 +84,28 @@ sub w_obj {
 
 sub w_odescr {
     my ($oid, $descr) = splitAndFill(' ', $_[0], 2);
+    $oid = meta('zone') . ".$oid";
     objdescr($oid, $descr);
     return "descr added for object #$oid";
 }
 
-sub w_putobj {
-    my ($rid, $oid, $st) = splitAndFill(' ', $_[0], 3);
-    $st = $st ? int($st) : 0;
-    my $err = putObjInt($rid, $oid, $st);
-    return $err ? $err : "obj #$oid added to room #$rid";
-}
-
 sub w_rdescr {
     my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
+    $rid = meta('zone') . ".$rid";
     roomdescr($rid, $descr);
     return "descr added for room #$rid";
 }
 
 sub w_room {
-    my ($rid, $descr) = splitAndFill(' ', $_[0], 2);
+    my ($rid0, $descr) = splitAndFill(' ', $_[0], 2);
+    my $rid = meta('zone') . ".$rid0";
     room($rid, initRoom($descr));
     my $roomst = roomstate($rid);
     roomstate($rid, {}) if (!$roomst);
+    if ($rid0 eq 'start') {
+        meta('start', $rid);
+        z_teleport($rid);
+    }
     return "room $rid added";
 }
 
@@ -121,11 +123,17 @@ sub w_tlpt {
 
 sub w_way {
     my ($rid1, $dir) = splitAndFill(' ', $_[0], 2);
+    $rid1 = meta('zone') . ".$rid1";
     my $room = room($rid1);
     return 'No source room' if (!$room);
     push @{$$room{'w'}}, $dir;
     room($rid1, $room);
     return "path from $rid1 added";
+}
+
+sub w_zone {
+    meta('zone', $_[0]);
+    return "zone changed to $_[0]";
 }
 
 1;
