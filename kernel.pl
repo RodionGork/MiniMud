@@ -10,16 +10,14 @@ require 'wizard.pl';
 my $lang = $ENV{'MUD_LANG'} // '';
 if ($lang) {
     require "lang-$lang.pl";
-} else {
-    $lang = 'en';
 }
 
-our $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
-our $pathMem = 20;
-our $timeScale = $ENV{'MUD_TIMESCALE'} // 1;
-our $goSleepTime = 300 / $timeScale;
-our $goExpiredTime = 600 / $timeScale;
-our $maxObjInHands = 2;
+my $wizPwd = $ENV{'MUD_WIZPWD'} // 'Pl0ugh!';
+my $pathMem = 20;
+my $timeScale = $ENV{'MUD_TIMESCALE'} // 1;
+my $goSleepTime = 300 / $timeScale;
+my $goExpiredTime = 600 / $timeScale;
+my $maxObjInHands = 2;
 
 my $cur;
 
